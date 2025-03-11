@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/week"
+    android:previewImage="@drawable/week_progress"
+    android:minWidth="150dp"
+    android:minHeight="50dp"
+    android:maxResizeHeight="100.dp"
+    android:updatePeriodMillis="1800000"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
