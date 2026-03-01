@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import com.example.yearprogress.components.ProgressTracker
 import com.example.yearprogress.ui.theme.YearProgressTheme
 
 class MainActivity : ComponentActivity() {

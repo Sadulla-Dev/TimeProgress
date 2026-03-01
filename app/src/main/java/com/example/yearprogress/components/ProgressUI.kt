@@ -1,4 +1,4 @@
-package com.example.yearprogress
+package com.example.yearprogress.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
