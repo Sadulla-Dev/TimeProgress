@@ -1,6 +1,10 @@
 package com.example.yearprogress.widget
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
@@ -8,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -15,6 +21,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -105,3 +112,117 @@ class DayProgressWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget
         get() = DayProgressWidget
 }
+
+
+
+//class DayProgressWidgetReceiver : GlanceAppWidgetReceiver() {
+//    override val glanceAppWidget: GlanceAppWidget
+//        get() = DayProgressWidget
+//}
+//
+//object DayProgressWidget : GlanceAppWidget() {
+//
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    override suspend fun provideGlance(context: Context, id: GlanceId) {
+//        val currentTime = LocalDateTime.now()
+//        val currentDayOfMonth = currentTime.dayOfMonth
+//        val formattedValue =
+//            String.format(Locale.US, "%.3f", calculateDayProgress().toFloat() * 100)
+//        val parts = formattedValue.split(".")
+//        val intPart = parts.getOrNull(0) ?: "0"
+//        val decimalPart = parts.getOrNull(1) ?: "000000000"
+//
+//        val progress = calculateDayProgress()
+//
+//        val bitmap = createCircleProgressBitmap(
+//            size = 800,
+//            progress = progress.toFloat(),
+//            percentText =  ".$decimalPart%"
+//        )
+//
+//        provideContent {
+//
+//            Column(
+//                modifier = GlanceModifier
+//                    .fillMaxSize()
+//                    .background(Color.DarkGray)
+//                    .padding(16.dp)
+//                    .clickable(actionStartActivity<MainActivity>()),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//
+//                Text(
+//                    text = "Day Progress",
+//                    style = TextStyle(
+//                        color = ColorProvider(Color.White),
+//                        fontSize = 16.sp
+//                    )
+//                )
+//
+//
+//                Image(
+//                    provider = ImageProvider(bitmap),
+//                    contentDescription = "Day progress"
+//                )
+//            }
+//        }
+//    }
+//}
+//
+//fun createCircleProgressBitmap(
+//    size: Int,
+//    progress: Float,
+//    percentText: String
+//): Bitmap {
+//
+//    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+//    val canvas = Canvas(bitmap)
+//
+//    val stroke = size * 0.08f
+//
+//    val backgroundPaint = Paint().apply {
+//        color = android.graphics.Color.GRAY
+//        style = Paint.Style.STROKE
+//        strokeWidth = stroke
+//        isAntiAlias = true
+//    }
+//
+//    val progressPaint = Paint().apply {
+//        color = android.graphics.Color.WHITE
+//        style = Paint.Style.STROKE
+//        strokeWidth = stroke
+//        strokeCap = Paint.Cap.ROUND
+//        isAntiAlias = true
+//    }
+//
+//    val textPaint = Paint().apply {
+//        color = android.graphics.Color.WHITE
+//        textSize = size * 0.18f
+//        textAlign = Paint.Align.CENTER
+//        isAntiAlias = true
+//    }
+//
+//    val rect = RectF(
+//        stroke,
+//        stroke,
+//        size - stroke,
+//        size - stroke
+//    )
+//
+//    val missingAngle = 96f
+//    val startAngle = 90f + missingAngle / 2
+//    val sweepAngle = 360f - missingAngle
+//
+//    // background
+//    canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint)
+//
+//    // progress
+//    canvas.drawArc(rect, startAngle, sweepAngle * progress, false, progressPaint)
+//
+//    val x = size / 2f
+//    val y = size / 2f - (textPaint.descent() + textPaint.ascent()) / 2
+//    canvas.drawText(percentText, x, y, textPaint)
+//
+//    return bitmap
+//}
