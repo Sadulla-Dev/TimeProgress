@@ -29,56 +29,71 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import com.example.yearprogress.utils.calculateDayProgress
 import java.time.LocalDateTime
+import android.graphics.*
+import android.view.WindowManager
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
+import androidx.glance.*
 
 class AllProgressWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget
-        get() = AllProgressWidget
+    override val glanceAppWidget: GlanceAppWidget = AllProgressWidget
 }
 
 object AllProgressWidget : GlanceAppWidget() {
-
     override val sizeMode = SizeMode.Responsive(
         setOf(
+            DpSize(120.dp, 60.dp),  // 2x1
             DpSize(120.dp, 120.dp), // 2x2
-            DpSize(200.dp, 100.dp), // 3x1
-            DpSize(300.dp, 100.dp)  // 4x1
+            DpSize(180.dp, 60.dp),  // 3x1
+            DpSize(250.dp, 60.dp),  // 4x1
         )
     )
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-
             val size = LocalSize.current
 
-            if (size.width >= 200.dp && size.height <= 120.dp) {
-                // 3x1 yoki 4x1
-                FourByOneLayout()
+            val isWide = size.width >= 110.dp   // 3x1, 4x1
+            val isTall = size.height >= 100.dp  // 2x2
+
+            if (isWide && !isTall) {
+                FourByOneLayout()  // 3x1, 4x1
             } else {
-                // 1x1, 2x1, 2x2, 3x2
-                TwoByTwoLayout()
+                TwoByTwoLayout()   // 2x1, 2x2
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
+fun getScreenWidth(context: Context): Int {
+    val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    val metrics = wm.currentWindowMetrics
+    return metrics.bounds.width()
+}
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FourByOneLayout() {
+    val context = LocalContext.current
+    // Dinamik ranglarni olish
+    val colors = GlanceTheme.colors
+    val primary = colors.primary.getColor(context).toArgb()
+    val onSurface = colors.onSurface.getColor(context).toArgb()
+    val outline = colors.outline.getColor(context).toArgb()
 
-    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day")
-    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week")
-    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month")
-    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year")
+    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day", primary, outline)
+    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week", primary, outline)
+    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month", primary, outline)
+    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year", primary, outline)
 
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color.DarkGray)
+            .background(GlanceTheme.colors.widgetBackground)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Image(ImageProvider(year), null, GlanceModifier.defaultWeight())
         Image(ImageProvider(month), null, GlanceModifier.defaultWeight())
         Image(ImageProvider(week), null, GlanceModifier.defaultWeight())
@@ -89,28 +104,27 @@ fun FourByOneLayout() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TwoByTwoLayout() {
+    val context = LocalContext.current
+    val colors = GlanceTheme.colors
+    val primary = colors.primary.getColor(context).toArgb()
+    val outline = colors.outline.getColor(context).toArgb()
 
-    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day")
-    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week")
-    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month")
-    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year")
+    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day", primary, outline)
+    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week", primary, outline)
+    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month", primary, outline)
+    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year", primary, outline)
 
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color.DarkGray)
+            .background(GlanceTheme.colors.widgetBackground)
             .padding(8.dp)
     ) {
-
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().defaultWeight()
-        ) {
+        Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
             Image(ImageProvider(year), null, GlanceModifier.defaultWeight())
             Image(ImageProvider(month), null, GlanceModifier.defaultWeight())
         }
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().defaultWeight()
-        ) {
+        Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
             Image(ImageProvider(week), null, GlanceModifier.defaultWeight())
             Image(ImageProvider(day), null, GlanceModifier.defaultWeight())
         }
@@ -121,100 +135,82 @@ fun TwoByTwoLayout() {
 fun calculateWeekProgress(): Double {
     val now = LocalDateTime.now()
     val dayProgress = calculateDayProgress()
-    val dayOfWeek = now.dayOfWeek.value - 1
-    val totalDays = 7f
-    return (dayOfWeek + dayProgress) / totalDays
+    return (now.dayOfWeek.value - 1 + dayProgress) / 7.0
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun calculateMonthProgress(): Double {
     val now = LocalDateTime.now()
     val dayProgress = calculateDayProgress()
-    val day = now.dayOfMonth - 1
-    val daysInMonth = now.toLocalDate().lengthOfMonth().toFloat()
-    return (day + dayProgress) / daysInMonth
+    val daysInMonth = now.toLocalDate().lengthOfMonth()
+    return (now.dayOfMonth - 1 + dayProgress) / daysInMonth.toDouble()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun calculateYearProgress(): Double {
     val now = LocalDateTime.now()
     val dayProgress = calculateDayProgress()
-    val day = now.dayOfYear - 1
-    val daysInYear = now.toLocalDate().lengthOfYear().toFloat()
-    return (day + dayProgress) / daysInYear
+    val daysInYear = now.toLocalDate().lengthOfYear()
+    return (now.dayOfYear - 1 + dayProgress) / daysInYear.toDouble()
 }
+
+// --- Dinamik Bitmap yaratish ---
 
 fun createCircleProgressBitmap(
     size: Int,
     progress: Double,
-    label: String
+    label: String,
+    mainColor: Int,     // Progress va matn rangi
+    secondaryColor: Int // Orqa fon aylana rangi
 ): Bitmap {
-
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-
     val stroke = size * 0.08f
 
     val backgroundPaint = Paint().apply {
-        color = android.graphics.Color.GRAY
+        color = secondaryColor
         style = Paint.Style.STROKE
         strokeWidth = stroke
         isAntiAlias = true
+        alpha = 70 // Orqa fon aylanasini biroz shaffof qilish
     }
 
     val progressPaint = Paint().apply {
-        color = android.graphics.Color.WHITE
+        color = mainColor
         style = Paint.Style.STROKE
         strokeWidth = stroke
         strokeCap = Paint.Cap.ROUND
         isAntiAlias = true
     }
 
-    // Label matni uchun paint (masalan "Day", "Week")
-    val labelPaint = Paint().apply {
-        color = android.graphics.Color.WHITE
-        textSize = size * 0.16f
+    val textPaint = Paint().apply {
+        color = mainColor
         textAlign = Paint.Align.CENTER
         isAntiAlias = true
-        isFakeBoldText = false
     }
 
-    // Foiz matni uchun paint (masalan "73%")
-    val percentPaint = Paint().apply {
-        color = android.graphics.Color.WHITE
-        textSize = size * 0.20f
-        textAlign = Paint.Align.CENTER
-        isAntiAlias = true
-        isFakeBoldText = true
-    }
-
-    val rect = RectF(
-        stroke,
-        stroke,
-        size - stroke,
-        size - stroke
-    )
-
-    val missingAngle = 96f
+    val rect = RectF(stroke, stroke, size - stroke, size - stroke)
+    val missingAngle = 90f
     val startAngle = 90f + missingAngle / 2
     val sweepAngle = 360f - missingAngle
 
-    // Orqa fon yoy
+    // Chizish
     canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint)
-
-    // Progress yoy
     canvas.drawArc(rect, startAngle, (sweepAngle * progress).toFloat(), false, progressPaint)
 
     val cx = size / 2f
 
-    // Foiz matni — markazdan bir oz yuqorida
-    val percentText = "${(progress * 100).toInt()}%"
-    val percentY = size / 2f - (percentPaint.descent() + percentPaint.ascent()) / 2 - size * 0.04f
-    canvas.drawText(percentText, cx, percentY, percentPaint)
+    // Foiz matni
+    textPaint.textSize = size * 0.22f
+    textPaint.isFakeBoldText = true
+    val percentY = size / 2f - (textPaint.descent() + textPaint.ascent()) / 2 - size * 0.05f
+    canvas.drawText("${(progress * 100).toInt()}%", cx, percentY, textPaint)
 
-    // Label matni — foizdan pastda
-    val labelY = percentY + percentPaint.descent() - labelPaint.ascent() + size * 0.01f
-    canvas.drawText(label, cx, labelY, labelPaint)
+    // Label matni
+    textPaint.textSize = size * 0.15f
+    textPaint.isFakeBoldText = false
+    val labelY = percentY + size * 0.18f
+    canvas.drawText(label, cx, labelY, textPaint)
 
     return bitmap
 }
