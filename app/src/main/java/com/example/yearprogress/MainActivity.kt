@@ -1,5 +1,6 @@
 package com.example.yearprogress
 
+import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -17,12 +18,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.yearprogress.components.LanguageDialog
 import com.example.yearprogress.components.ProgressTracker
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.LanguageManager
+import androidx.core.content.edit
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -42,34 +46,26 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @Composable
-    fun MainScreen() {
-        val showDialog = remember { mutableStateOf(false) }
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun MainScreen(viewModel: MainViewModel = viewModel()) {
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            ProgressTracker()
+    val context = LocalContext.current
 
-            Button(
-                onClick = { showDialog.value = true },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                Text(text = stringResource(id = R.string.language_selection))
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            if (showDialog.value) {
-                LanguageDialog(
-                    onDismiss = { showDialog.value = false },
-                    onLanguageSelected = { language ->
-                        val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-                        sharedPrefs.edit().putString("language", language).apply()
-                        recreate()
-                    }
-                )
-            }
+        ProgressTracker(viewModel)
+
+        if (viewModel.isFirstLaunch) {
+            LanguageDialog(
+                onDismiss = { /* dismiss qilinmaydi */ },
+                onLanguageSelected = { language ->
+                    viewModel.changeLanguage(language)
+                    (context as Activity).recreate()
+                }
+            )
         }
     }
 }

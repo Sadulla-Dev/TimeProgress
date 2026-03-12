@@ -2,26 +2,63 @@
 
 package com.example.yearprogress.components
 
+import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -33,11 +70,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.*
-import androidx.compose.ui.res.stringResource
+import com.example.yearprogress.MainViewModel
 import com.example.yearprogress.R
 import com.example.yearprogress.ui.theme.BG_CARD
 import com.example.yearprogress.ui.theme.BG_DARK
@@ -50,69 +83,207 @@ import com.example.yearprogress.ui.theme.COLOR_YEAR
 import com.example.yearprogress.ui.theme.TEXT_DIM
 import com.example.yearprogress.ui.theme.TEXT_MUTED
 import com.example.yearprogress.ui.theme.TEXT_PRIMARY
+import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
+import com.example.yearprogress.utils.ageComponents
+import com.example.yearprogress.utils.dayProgress
+import com.example.yearprogress.utils.getDaySuffix
+import com.example.yearprogress.utils.lifeProgress
+import com.example.yearprogress.utils.monthProgress
+import com.example.yearprogress.utils.weekProgress
+import com.example.yearprogress.utils.yearProgress
 import kotlinx.coroutines.delay
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.Locale
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-private const val UZ_LIFE_EXPECTANCY = 75.1
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun getDaySuffix(day: Int) = when {
-    day in 11..13 -> "th"
-    day % 10 == 1 -> "st"
-    day % 10 == 2 -> "nd"
-    day % 10 == 3 -> "rd"
-    else           -> "th"
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
-private fun yearProgress(now: LocalDateTime): Double {
-    val start = LocalDateTime.of(now.year, 1, 1, 0, 0)
-    val end   = LocalDateTime.of(now.year, 12, 31, 23, 59, 59)
-    return ChronoUnit.SECONDS.between(start, now).toDouble() /
-            ChronoUnit.SECONDS.between(start, end).toDouble()
-}
+@Composable
+fun ProgressTracker(
+    viewModel: MainViewModel
+) {
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000); now = LocalDateTime.now()
+        }
+    }
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun monthProgress(now: LocalDateTime): Double {
-    val start = LocalDateTime.of(now.year, now.month, 1, 0, 0)
-    val end   = start.plusMonths(1).minusSeconds(1)
-    return ChronoUnit.SECONDS.between(start, now).toDouble() /
-            ChronoUnit.SECONDS.between(start, end).toDouble()
-}
+    var birthDate by remember { mutableStateOf<LocalDate?>(null) }
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun weekProgress(now: LocalDateTime): Double {
-    val dayOfWeek = now.dayOfWeek.value % 7  // Sunday = 0
-    val start = now.toLocalDate().atStartOfDay().minusDays(dayOfWeek.toLong())
-    val end   = start.plusDays(7).minusSeconds(1)
-    return ChronoUnit.SECONDS.between(start, now).toDouble() /
-            ChronoUnit.SECONDS.between(start, end).toDouble()
-}
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun dayProgress(now: LocalDateTime): Double {
-    val start = now.toLocalDate().atStartOfDay()
-    val end   = start.plusDays(1).minusSeconds(1)
-    return ChronoUnit.SECONDS.between(start, now).toDouble() /
-            ChronoUnit.SECONDS.between(start, end).toDouble()
-}
+    val months =
+        listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+    val dayNames = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun lifeProgress(birthDate: LocalDate): Double {
-    val now = LocalDate.now()
-    val ageYears = ChronoUnit.DAYS.between(birthDate, now) / 365.25
-    return (ageYears / UZ_LIFE_EXPECTANCY).coerceIn(0.0, 1.0)
-}
+    val cards = listOf(
+        Triple(
+            stringResource(R.string.year), now.year.toString(),
+            yearProgress(now) to ChronoUnit.SECONDS.between(
+                LocalDateTime.of(now.year, 1, 1, 0, 0),
+                LocalDateTime.of(now.year, 12, 31, 23, 59, 59)
+            ) to COLOR_YEAR
+        ),
+        Triple(
+            stringResource(R.string.month), months[now.monthValue - 1],
+            monthProgress(now) to ChronoUnit.SECONDS.between(
+                LocalDateTime.of(now.year, now.month, 1, 0, 0),
+                LocalDateTime.of(now.year, now.month, 1, 0, 0).plusMonths(1).minusSeconds(1)
+            ) to COLOR_MONTH
+        ),
+        Triple(
+            stringResource(R.string.week), dayNames[now.dayOfWeek.value % 7],
+            weekProgress(now) to 604800L to COLOR_WEEK
+        ),
+        Triple(
+            stringResource(R.string.day), "${now.dayOfMonth}${getDaySuffix(now.dayOfMonth)}",
+            dayProgress(now) to 86400L to COLOR_DAY
+        ),
+    )
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun ageComponents(birthDate: LocalDate): Triple<Int, Int, Int> {
-    val now = LocalDate.now()
-    var years  = now.year - birthDate.year
-    var months = now.monthValue - birthDate.monthValue
-    var days   = now.dayOfMonth - birthDate.dayOfMonth
-    if (days   < 0) { months--; days   += java.time.YearMonth.of(now.year, now.month.minus(1)).lengthOfMonth() }
-    if (months < 0) { years--;  months += 12 }
-    return Triple(years, months, days)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BG_DARK)
+    ) {
+
+        // Background glow top
+        Box(
+            modifier = Modifier
+                .size(500.dp)
+                .align(Alignment.TopCenter)
+                .offset(y = (-200).dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(Color(0xFF6366F1).copy(0.06f), Color.Transparent)
+                    ), CircleShape
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
+            Spacer(Modifier.height(52.dp))
+
+            // Live chip
+            LiveChip()
+
+            Spacer(Modifier.height(16.dp))
+
+            // Header
+            Text(
+                buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TEXT_PRIMARY
+                        )
+                    ) {
+                        append(stringResource(R.string.time) + "\n")
+                    }
+
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TEXT_PRIMARY.copy(0.25f)
+                        )
+                    ) {
+                        append(stringResource(R.string.is_passing))
+                    }
+                }
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                stringResource(R.string.every_second_minute_hour_is_not_coming_back),
+                fontSize = 13.sp,
+                color = TEXT_MUTED
+            )
+            Spacer(Modifier.height(24.dp))
+
+            // Time cards
+            cards.forEach { (title, label, rest) ->
+                val (progressPair, color) = rest
+                val (progress, totalSec) = progressPair
+                TimeCard(
+                    title = title,
+                    label = label,
+                    progress = progress,
+                    totalSeconds = totalSec,
+                    accentColor = color
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+
+            Spacer(Modifier.height(6.dp))
+
+            // Life section
+            if (birthDate != null) {
+                LifeSection(birthDate = birthDate!!, onReset = { birthDate = null })
+            } else {
+                BirthDateInput(onSubmit = { birthDate = it })
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // Footer
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    stringResource(
+                        R.string.uzbekistan_average_life_expectancy,
+                        UZ_LIFE_EXPECTANCY
+                    ),
+                    fontSize = 10.sp,
+                    color = TEXT_DIM,
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.based_on_world_bank_data),
+                    fontSize = 9.sp,
+                    color = TEXT_DIM.copy(0.6f),
+                    fontFamily = FontFamily.Monospace
+                )
+
+                TextButton (
+                    onClick = {showDialog = true},
+                ){
+                    Text(
+                        stringResource(R.string.change_language),
+                        fontSize = 10.sp,
+                        color = TEXT_MUTED,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(40.dp))
+
+        }
+        // ─── Language Dialog ─────────────────────────────────────────────
+        if (showDialog) {
+            LanguageDialog(
+                onDismiss = { showDialog = false },
+                onLanguageSelected = { lang ->
+                    viewModel.changeLanguage(lang)
+                    (context as Activity).recreate()
+                }
+            )
+        }
+    }
 }
 
 // ─── Animated progress value ─────────────────────────────────────────────────
@@ -176,7 +347,7 @@ private fun TimeCard(
     accentColor: Color,
 ) {
     val animProg = animatedProgressFloat(progress.toFloat())
-    val elapsed  = (progress * totalSeconds).toLong()
+    val elapsed = (progress * totalSeconds).toLong()
 
     Box(
         modifier = Modifier
@@ -186,17 +357,6 @@ private fun TimeCard(
             .border(1.dp, CARD_BORDER, RoundedCornerShape(20.dp))
             .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
-        // Subtle glow in top-right
-//        Box(
-//            modifier = Modifier
-//                .size(80.dp)
-//                .align(Alignment.TopEnd)
-//                .offset(x = 20.dp, y = (-20).dp)
-//                .background(
-//                    Brush.radialGradient(listOf(accentColor.copy(0.10f), Color.Transparent)),
-//                    CircleShape
-//                )
-//        )
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -204,8 +364,10 @@ private fun TimeCard(
                 verticalAlignment = Alignment.Top
             ) {
                 Column {
-                    Text(title, fontSize = 10.sp, color = TEXT_DIM,
-                        letterSpacing = 2.sp, fontFamily = FontFamily.Monospace)
+                    Text(
+                        title, fontSize = 10.sp, color = TEXT_DIM,
+                        letterSpacing = 2.sp, fontFamily = FontFamily.Monospace
+                    )
                     Spacer(Modifier.height(4.dp))
                     Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TEXT_DIM)
                 }
@@ -247,17 +409,26 @@ private fun TimeCard(
             // Percentage
             val pct = progress * 100
             val intPart = pct.toLong().toString()
-            val decPart = String.format(Locale.US, "%.6f", pct - pct.toLong()).substring(1) // ".xxxxxx"
+            val decPart =
+                String.format(Locale.US, "%.6f", pct - pct.toLong()).substring(1) // ".xxxxxx"
 
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     buildAnnotatedString {
-                        withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Black,
-                            color = TEXT_PRIMARY, fontFamily = FontFamily.Monospace)) {
+                        withStyle(
+                            SpanStyle(
+                                fontSize = 30.sp, fontWeight = FontWeight.Black,
+                                color = TEXT_PRIMARY, fontFamily = FontFamily.Monospace
+                            )
+                        ) {
                             append(intPart)
                         }
-                        withStyle(SpanStyle(fontSize = 20.sp, fontWeight = FontWeight.Medium,
-                            color = TEXT_MUTED, fontFamily = FontFamily.Monospace)) {
+                        withStyle(
+                            SpanStyle(
+                                fontSize = 20.sp, fontWeight = FontWeight.Medium,
+                                color = TEXT_MUTED, fontFamily = FontFamily.Monospace
+                            )
+                        ) {
                             append("$decPart%")
                         }
                     }
@@ -304,9 +475,9 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
         DotMode.entries.forEach { mode ->
             val active = dotMode == mode
             val label = when (mode) {
-                DotMode.YEAR  -> stringResource(R.string.year)
+                DotMode.YEAR -> stringResource(R.string.year)
                 DotMode.MONTH -> stringResource(R.string.month)
-                DotMode.WEEK  -> stringResource(R.string.week)
+                DotMode.WEEK -> stringResource(R.string.week)
             }
             Box(
                 modifier = Modifier
@@ -345,15 +516,15 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                 maxItemsInEachRow = 15
             ) {
                 repeat(totalYears) { i ->
-                    val yearNum   = birthDate.year + i
-                    val isPast    = i < filledYears
+                    val yearNum = birthDate.year + i
+                    val isPast = i < filledYears
                     val isCurrent = i == filledYears
                     val isSelected = selectedYear == i
                     val dotColor = when {
                         isSelected -> Color.White
-                        isPast     -> COLOR_LIFE.copy(alpha = 0.85f)
-                        isCurrent  -> COLOR_LIFE.copy(alpha = partialFraction.toFloat())
-                        else       -> Color(0xFF1E1E2E)
+                        isPast -> COLOR_LIFE.copy(alpha = 0.85f)
+                        isCurrent -> COLOR_LIFE.copy(alpha = partialFraction.toFloat())
+                        else -> Color(0xFF1E1E2E)
                     }
                     Box(
                         modifier = Modifier
@@ -375,8 +546,8 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             // ── Selected year detail ───────────────────────────────────────
             selectedYear?.let { idx ->
                 val displayYear = birthDate.year + idx
-                val isPast      = idx < filledYears
-                val isCurrent   = idx == filledYears
+                val isPast = idx < filledYears
+                val isCurrent = idx == filledYears
 
                 Spacer(Modifier.height(14.dp))
                 Box(
@@ -410,8 +581,8 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                     .background(
                                         when {
                                             isCurrent -> Color(0xFF92400E).copy(0.3f)
-                                            isPast    -> COLOR_LIFE.copy(0.12f)
-                                            else      -> Color.Transparent
+                                            isPast -> COLOR_LIFE.copy(0.12f)
+                                            else -> Color.Transparent
                                         }
                                     )
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
@@ -434,7 +605,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
 
                         // 12 month dots for selected year
                         val monthsLived: Int = when {
-                            isPast    -> 12
+                            isPast -> 12
                             isCurrent -> {
                                 val bd = birthDate.withYear(displayYear)
                                 val today = LocalDate.now()
@@ -442,6 +613,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                     today.monthValue - bd.monthValue + 1
                                 else 12
                             }
+
                             else -> 0
                         }.coerceIn(0, 12)
 
@@ -456,7 +628,8 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
-                            val monthNames = listOf("Y","F","M","A","M","I","I","A","S","O","N","D")
+                            val monthNames =
+                                listOf("Y", "F", "M", "A", "M", "I", "I", "A", "S", "O", "N", "D")
                             repeat(12) { m ->
                                 val mFilled = m < monthsLived
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -484,12 +657,18 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
 
                         // 52 week dots
                         val weeksLived: Int = when {
-                            isPast    -> 52
+                            isPast -> 52
                             isCurrent -> {
-                                val yearStart = LocalDate.of(displayYear, birthDate.monthValue, birthDate.dayOfMonth)
+                                val yearStart = LocalDate.of(
+                                    displayYear,
+                                    birthDate.monthValue,
+                                    birthDate.dayOfMonth
+                                )
                                     .coerceAtLeast(LocalDate.of(displayYear, 1, 1))
-                                ChronoUnit.WEEKS.between(yearStart, LocalDate.now()).toInt().coerceIn(0, 52)
+                                ChronoUnit.WEEKS.between(yearStart, LocalDate.now()).toInt()
+                                    .coerceIn(0, 52)
                             }
+
                             else -> 0
                         }
 
@@ -525,7 +704,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
 
         // ── OY mode: 75*12 = 900 small squares ────────────────────────────
         DotMode.MONTH -> {
-            val totalMonths  = (UZ_LIFE_EXPECTANCY * 12).toInt()
+            val totalMonths = (UZ_LIFE_EXPECTANCY * 12).toInt()
             val filledMonths = (ageYears * 12).toInt()
 
             Text(
@@ -572,7 +751,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
 
         // ── HAFTA mode: 75*52 = 3900 tiny dots ────────────────────────────
         DotMode.WEEK -> {
-            val totalWeeks  = (UZ_LIFE_EXPECTANCY * 52.18).toInt()
+            val totalWeeks = (UZ_LIFE_EXPECTANCY * 52.18).toInt()
             val filledWeeks = (ageYears * 52.18).toInt()
 
             Text(
@@ -625,7 +804,9 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
 private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
     var now by remember { mutableStateOf(LocalDate.now()) }
     LaunchedEffect(Unit) {
-        while (true) { delay(60_000); now = LocalDate.now() }
+        while (true) {
+            delay(60_000); now = LocalDate.now()
+        }
     }
 
     val lp = lifeProgress(birthDate)
@@ -633,9 +814,9 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
     val (years, months, days) = ageComponents(birthDate)
     val ageYears = ChronoUnit.DAYS.between(birthDate, now) / 365.25
     val remaining = UZ_LIFE_EXPECTANCY - ageYears
-    val remYears  = remaining.toInt()
-    val remWeeks  = (remaining * 52.18).toInt()
-    val remDays   = (remaining * 365.25).toInt()
+    val remYears = remaining.toInt()
+    val remWeeks = (remaining * 52.18).toInt()
+    val remDays = (remaining * 365.25).toInt()
 
     Column(
         modifier = Modifier
@@ -678,8 +859,10 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                         fontWeight = FontWeight.Black, color = TEXT_PRIMARY,
                         fontFamily = FontFamily.Monospace
                     )
-                    Text(l, fontSize = 9.sp, color = TEXT_MUTED,
-                        letterSpacing = 2.sp, fontFamily = FontFamily.Monospace)
+                    Text(
+                        l, fontSize = 9.sp, color = TEXT_MUTED,
+                        letterSpacing = 2.sp, fontFamily = FontFamily.Monospace
+                    )
                 }
             }
         }
@@ -741,12 +924,20 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
         // Life percentage
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(fontSize = 36.sp, fontWeight = FontWeight.Black,
-                    color = COLOR_LIFE, fontFamily = FontFamily.Monospace)) {
+                withStyle(
+                    SpanStyle(
+                        fontSize = 36.sp, fontWeight = FontWeight.Black,
+                        color = COLOR_LIFE, fontFamily = FontFamily.Monospace
+                    )
+                ) {
                     append(String.format(Locale.US, "%.4f", lp * 100))
                 }
-                withStyle(SpanStyle(fontSize = 20.sp, fontWeight = FontWeight.Medium,
-                    color = COLOR_LIFE.copy(0.7f), fontFamily = FontFamily.Monospace)) {
+                withStyle(
+                    SpanStyle(
+                        fontSize = 20.sp, fontWeight = FontWeight.Medium,
+                        color = COLOR_LIFE.copy(0.7f), fontFamily = FontFamily.Monospace
+                    )
+                ) {
                     append("%")
                 }
             },
@@ -823,7 +1014,12 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 .background(Color(0xFF111118))
                 .border(
                     width = 1.dp,
-                    brush = Brush.verticalGradient(listOf(COLOR_LIFE.copy(0.3f), Color.Transparent)),
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            COLOR_LIFE.copy(0.3f),
+                            Color.Transparent
+                        )
+                    ),
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(14.dp)
@@ -861,9 +1057,9 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
-    var day   by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf("") }
     var month by remember { mutableStateOf("") }
-    var year  by remember { mutableStateOf("") }
+    var year by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
 
     val dayFocus = remember { FocusRequester() }
@@ -873,15 +1069,15 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
     val keyboard = LocalSoftwareKeyboardController.current
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor      = TEXT_PRIMARY,
-        unfocusedTextColor    = TEXT_PRIMARY,
-        focusedBorderColor    = COLOR_LIFE.copy(0.5f),
-        unfocusedBorderColor  = CARD_BORDER,
+        focusedTextColor = TEXT_PRIMARY,
+        unfocusedTextColor = TEXT_PRIMARY,
+        focusedBorderColor = COLOR_LIFE.copy(0.5f),
+        unfocusedBorderColor = CARD_BORDER,
         focusedContainerColor = Color(0xFF16161F),
         unfocusedContainerColor = Color(0xFF16161F),
-        cursorColor           = COLOR_LIFE,
-        focusedLabelColor     = TEXT_MUTED,
-        unfocusedLabelColor   = TEXT_MUTED,
+        cursorColor = COLOR_LIFE,
+        focusedLabelColor = TEXT_MUTED,
+        unfocusedLabelColor = TEXT_MUTED,
     )
 
     Column(
@@ -928,15 +1124,30 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(dayFocus),
-                label = { Text(stringResource(R.string.day), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                placeholder = { Text("01", fontSize = 18.sp, color = TEXT_DIM,
-                    fontFamily = FontFamily.Monospace) },
+                label = {
+                    Text(
+                        stringResource(R.string.day),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
+                placeholder = {
+                    Text(
+                        "01", fontSize = 18.sp, color = TEXT_DIM,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = fieldColors,
-                textStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace, textAlign = TextAlign.Center, color = TEXT_PRIMARY)
+                textStyle = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center,
+                    color = TEXT_PRIMARY
+                )
             )
 
             Text("/", fontSize = 22.sp, color = TEXT_DIM)
@@ -954,15 +1165,30 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(monthFocus),
-                label = { Text(stringResource(R.string.month), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                placeholder = { Text("09", fontSize = 18.sp, color = TEXT_DIM,
-                    fontFamily = FontFamily.Monospace) },
+                label = {
+                    Text(
+                        stringResource(R.string.month),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
+                placeholder = {
+                    Text(
+                        "09", fontSize = 18.sp, color = TEXT_DIM,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = fieldColors,
-                textStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace, textAlign = TextAlign.Center, color = TEXT_PRIMARY)
+                textStyle = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center,
+                    color = TEXT_PRIMARY
+                )
             )
 
             Text("/", fontSize = 22.sp, color = TEXT_DIM)
@@ -980,22 +1206,39 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(2f)
                     .focusRequester(yearFocus),
-                label = { Text(stringResource(R.string.year), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                placeholder = { Text("1995", fontSize = 18.sp, color = TEXT_DIM,
-                    fontFamily = FontFamily.Monospace) },
+                label = {
+                    Text(
+                        stringResource(R.string.year),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
+                placeholder = {
+                    Text(
+                        "1995", fontSize = 18.sp, color = TEXT_DIM,
+                        fontFamily = FontFamily.Monospace
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = fieldColors,
-                textStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace, textAlign = TextAlign.Start, color = TEXT_PRIMARY)
+                textStyle = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Start,
+                    color = TEXT_PRIMARY
+                )
             )
         }
 
         if (error.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Text(error, fontSize = 11.sp, color = Color(0xFFF87171),
-                fontFamily = FontFamily.Monospace)
+            Text(
+                error, fontSize = 11.sp, color = Color(0xFFF87171),
+                fontFamily = FontFamily.Monospace
+            )
         }
 
         Spacer(Modifier.height(16.dp))
@@ -1036,7 +1279,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = COLOR_LIFE,
-                contentColor   = Color.Black
+                contentColor = Color.Black
             )
         ) {
             Text(
@@ -1046,153 +1289,6 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 fontFamily = FontFamily.Monospace,
                 letterSpacing = 1.sp
             )
-        }
-    }
-}
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun ProgressTracker() {
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(Unit) { while (true) { delay(1000); now = LocalDateTime.now() } }
-
-    var birthDate by remember { mutableStateOf<LocalDate?>(null) }
-
-    val months = listOf("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC")
-    val dayNames = listOf("SUN","MON","TUE","WED","THU","FRI","SAT")
-
-    val cards = listOf(
-        Triple(stringResource(R.string.year),  now.year.toString(),
-            yearProgress(now) to ChronoUnit.SECONDS.between(
-                LocalDateTime.of(now.year,1,1,0,0),
-                LocalDateTime.of(now.year,12,31,23,59,59)
-            ) to COLOR_YEAR),
-        Triple(stringResource(R.string.month), months[now.monthValue - 1],
-            monthProgress(now) to ChronoUnit.SECONDS.between(
-                LocalDateTime.of(now.year, now.month,1,0,0),
-                LocalDateTime.of(now.year, now.month,1,0,0).plusMonths(1).minusSeconds(1)
-            ) to COLOR_MONTH),
-        Triple(stringResource(R.string.week),  dayNames[now.dayOfWeek.value % 7],
-            weekProgress(now) to 604800L to COLOR_WEEK),
-        Triple(stringResource(R.string.day),   "${now.dayOfMonth}${getDaySuffix(now.dayOfMonth)}",
-            dayProgress(now) to 86400L to COLOR_DAY),
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BG_DARK)
-    ) {
-        // Background glow top
-        Box(
-            modifier = Modifier
-                .size(500.dp)
-                .align(Alignment.TopCenter)
-                .offset(y = (-200).dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(Color(0xFF6366F1).copy(0.06f), Color.Transparent)
-                    ), CircleShape
-                )
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(Modifier.height(52.dp))
-
-            // Live chip
-            LiveChip()
-
-            Spacer(Modifier.height(16.dp))
-
-            // Header
-            Text(
-                buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TEXT_PRIMARY
-                        )
-                    ) {
-                        append(stringResource(R.string.time) + "\n")
-                    }
-
-                    withStyle(
-                        SpanStyle(
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Black,
-                            color = TEXT_PRIMARY.copy(0.25f)
-                        )
-                    ) {
-                        append(stringResource(R.string.is_passing))
-                    }
-                }
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                stringResource(R.string.every_second_minute_hour_is_not_coming_back),
-                fontSize = 13.sp,
-                color = TEXT_MUTED
-            )
-            Spacer(Modifier.height(24.dp))
-
-            // Time cards
-            cards.forEach { (title, label, rest) ->
-                val (progressPair, color) = rest
-                val (progress, totalSec) = progressPair
-                TimeCard(
-                    title        = title,
-                    label        = label,
-                    progress     = progress,
-                    totalSeconds = totalSec,
-                    accentColor  = color
-                )
-                Spacer(Modifier.height(10.dp))
-            }
-
-            Spacer(Modifier.height(6.dp))
-
-            // Life section
-            if (birthDate != null) {
-                LifeSection(birthDate = birthDate!!, onReset = { birthDate = null })
-            } else {
-                BirthDateInput(onSubmit = { birthDate = it })
-            }
-
-            Spacer(Modifier.height(32.dp))
-
-            // Footer
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    stringResource(
-                        R.string.uzbekistan_average_life_expectancy,
-                        UZ_LIFE_EXPECTANCY
-                    ),
-                    fontSize = 10.sp,
-                    color = TEXT_DIM,
-                    fontFamily = FontFamily.Monospace
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.based_on_world_bank_data),
-                    fontSize = 9.sp,
-                    color = TEXT_DIM.copy(0.6f),
-                    fontFamily = FontFamily.Monospace
-                )
-            }
-
-            Spacer(Modifier.height(40.dp))
         }
     }
 }

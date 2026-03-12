@@ -2,9 +2,10 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/day"
     android:previewImage="@drawable/day_progress"
-    android:minWidth="150dp"
+    android:minWidth="50dp"
     android:minHeight="50dp"
-    android:maxResizeHeight="100.dp"
-    android:updatePeriodMillis="1800"
+    android:maxResizeHeight="50dp"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />

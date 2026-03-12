@@ -39,5 +39,6 @@
     <string name="based_on_world_bank_data">BASED ON WORLD BANK DATA</string>
     <string name="language_selection">Language</string>
     <string name="choose_language">Select Language</string>
+    <string name="change_language">Change language</string>
 
 </resources>

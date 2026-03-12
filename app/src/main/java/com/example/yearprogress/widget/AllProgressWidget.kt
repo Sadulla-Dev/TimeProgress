@@ -34,6 +34,9 @@ import android.view.WindowManager
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.glance.*
+import com.example.yearprogress.utils.calculateMonthProgress
+import com.example.yearprogress.utils.calculateWeekProgress
+import com.example.yearprogress.utils.calculateYearProgress
 
 class AllProgressWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AllProgressWidget
@@ -64,13 +67,6 @@ object AllProgressWidget : GlanceAppWidget() {
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.R)
-fun getScreenWidth(context: Context): Int {
-    val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val metrics = wm.currentWindowMetrics
-    return metrics.bounds.width()
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -131,30 +127,6 @@ fun TwoByTwoLayout() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun calculateWeekProgress(): Double {
-    val now = LocalDateTime.now()
-    val dayProgress = calculateDayProgress()
-    return (now.dayOfWeek.value - 1 + dayProgress) / 7.0
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun calculateMonthProgress(): Double {
-    val now = LocalDateTime.now()
-    val dayProgress = calculateDayProgress()
-    val daysInMonth = now.toLocalDate().lengthOfMonth()
-    return (now.dayOfMonth - 1 + dayProgress) / daysInMonth.toDouble()
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun calculateYearProgress(): Double {
-    val now = LocalDateTime.now()
-    val dayProgress = calculateDayProgress()
-    val daysInYear = now.toLocalDate().lengthOfYear()
-    return (now.dayOfYear - 1 + dayProgress) / daysInYear.toDouble()
-}
-
-// --- Dinamik Bitmap yaratish ---
 
 fun createCircleProgressBitmap(
     size: Int,

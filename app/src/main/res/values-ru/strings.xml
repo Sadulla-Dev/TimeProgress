@@ -39,4 +39,5 @@
     <string name="based_on_world_bank_data">НА ОСНОВЕ ДАННЫХ ВСЕМИРНОГО БАНКА</string>
     <string name="language_selection">Язык</string>
     <string name="choose_language">Выберите язык</string>
+    <string name="change_language">Изменить язык</string>
 </resources>
