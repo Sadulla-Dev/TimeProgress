@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Прогресс времени</string>
+    <string name="all">Все</string>
+    <string name="live">ВЖИВУЮ</string>
+    <string name="year">ГОД</string>
+    <string name="month">МЕСЯЦ</string>
+    <string name="week">НЕДЕЛЯ</string>
+    <string name="day">ДЕНЬ</string>
+    <string name="life_analysis_uzbekistan">АНАЛИЗ ЖИЗНИ · УЗБЕКИСТАН</string>
+    <string name="age_years_old">%1$.2f лет</string>
+    <string name="average_life_expectancy">в среднем %1$.1f лет</string>
+    <string name="life_progress_percentage">%1$.4f%%</string>
+    <string name="life_is_gone">жизнь прошла</string>
+    <string name="each_square_one_month">КАЖДЫЙ КВАДРАТ = 1 МЕСЯЦ · %1$d / %2$d МЕСЯЦЕВ</string>
+    <string name="months_left">ОСТАЛОСЬ %1$d МЕСЯЦЕВ</string>
+    <string name="each_dot_one_week">КАЖДАЯ ТОЧКА = 1 НЕДЕЛЯ · %1$d / %2$d НЕДЕЛЬ</string>
+    <string name="weeks_left">ОСТАЛОСЬ %1$d НЕДЕЛЬ</string>
+    <string name="year_age">%1$d — %2$d-й год</string>
+    <string name="now">СЕЙЧАС</string>
+    <string name="passed">ПРОШЛО</string>
+    <string name="months_word">МЕСЯЦЫ</string>
+    <string name="weeks_word">НЕДЕЛИ (52)</string>
+    <string name="remaining_years_remaning">ОСТАЛОСЬ (%1$S)</string>
+    <string name="quote">"Лучшее время для посадки дерева было 20 лет назад. Второе лучшее время — сейчас."</string>
+    <string name="change_date">← ИЗМЕНИТЬ ДАТУ</string>
+    <string name="life_analysis">АНАЛИЗ ЖИЗНИ</string>
+    <string name="enter_your_birth_date">Введите дату рождения</string>
+    <string name="day_input_placeholder">01</string>
+    <string name="month_input_placeholder">09</string>
+    <string name="year_input_placeholder">1995</string>
+    <string name="please_enter_valid_date">Пожалуйста, введите действительную дату</string>
+    <string name="date_cannot_be_in_the_future">Дата не может быть в будущем</string>
+    <string name="invalid_date">Неверная дата</string>
+    <string name="show_my_life">ПОКАЗАТЬ МОЮ ЖИЗНЬ →</string>
+    <string name="time">Время</string>
+    <string name="is_passing">проходит.</string>
+    <string name="every_second_minute_hour_is_not_coming_back">Каждая секунда, минута, час — не вернется.</string>
+    <string name="uzbekistan_average_life_expectancy">СРЕДНЯЯ ПРОДОЛЖИТЕЛЬНОСТЬ ЖИЗНИ В УЗБЕКИСТАНЕ: %1$.1f ЛЕТ</string>
+    <string name="based_on_world_bank_data">НА ОСНОВЕ ДАННЫХ ВСЕМИРНОГО БАНКА</string>
+    <string name="language_selection">Язык</string>
+    <string name="choose_language">Выберите язык</string>
+</resources>

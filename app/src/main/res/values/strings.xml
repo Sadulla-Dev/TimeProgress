@@ -1,8 +1,42 @@
 <resources>
-    <string name="app_name">Year progress</string>
-    <string name="week">Week</string>
-    <string name="year">Year</string>
-    <string name="month">Month</string>
-    <string name="day">Day</string>
-    <string name="all">All</string>
+    <string name="app_name">Vaqt Taraqqiyoti</string>
+    <string name="all">Barchasi</string>
+    <string name="live">JONLI</string>
+    <string name="year">YIL</string>
+    <string name="month">OY</string>
+    <string name="week">HAFTA</string>
+    <string name="day">KUN</string>
+    <string name="life_analysis_uzbekistan">HAYOT TAHLILI · O\'ZBEKISTON</string>
+    <string name="age_years_old">%1$.2f yosh</string>
+    <string name="average_life_expectancy">%1$.1f yosh o\'rtacha</string>
+    <string name="life_progress_percentage">%1$.4f%%</string>
+    <string name="life_is_gone">hayot o\'tdi</string>
+    <string name="each_square_one_month">HAR BIR KVADRAT = 1 OY · %1$d / %2$d OY</string>
+    <string name="months_left">%1$d OY QOLDI</string>
+    <string name="each_dot_one_week">HAR BIR NUQTA = 1 HAFTA · %1$d / %2$d HAFTA</string>
+    <string name="weeks_left">%1$d HAFTA QOLDI</string>
+    <string name="year_age">%1$d — %2$d-yosh</string>
+    <string name="now">HOZIR</string>
+    <string name="passed">O\'TDI</string>
+    <string name="months_word">OYLAR</string>
+    <string name="weeks_word">HAFTALAR (52)</string>
+    <string name="remaining_years_remaning">QOLDI (%1$S)</string>
+    <string name="quote">"Daraxt ekish uchun eng yaxshi vaqt 20 yil oldin edi. Ikkinchi eng yaxshi vaqt — hozir."</string>
+    <string name="change_date">← SANANI O\'ZGARTIRISH</string>
+    <string name="life_analysis">HAYOT TAHLILI</string>
+    <string name="enter_your_birth_date">Tug\'ilgan sanangizni kiriting</string>
+    <string name="day_input_placeholder">01</string>
+    <string name="month_input_placeholder">09</string>
+    <string name="year_input_placeholder">1995</string>
+    <string name="please_enter_valid_date">Iltimos to\'g\'ri sana kiriting</string>
+    <string name="date_cannot_be_in_the_future">Sana kelajakda bo\'lishi mumkin emas</string>
+    <string name="invalid_date">Noto\'g\'ri sana</string>
+    <string name="show_my_life">HAYOTIMNI KO\'RSAT →</string>
+    <string name="time">Vaqt</string>
+    <string name="is_passing">o\'tmoqda.</string>
+    <string name="every_second_minute_hour_is_not_coming_back">Har soniya, daqiqa, soat — qaytmaydi.</string>
+    <string name="uzbekistan_average_life_expectancy">O\'ZBEKISTON O\'RTACHA UMRI: %1$.1f YOSH</string>
+    <string name="based_on_world_bank_data">JAHON BANKI MA\'LUMOTLARI ASOSIDA</string>
+    <string name="language_selection">Til</string>
+    <string name="choose_language">Til tanlang</string>
 </resources>

@@ -37,23 +37,24 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import androidx.compose.ui.res.stringResource
+import com.example.yearprogress.R
+import com.example.yearprogress.ui.theme.BG_CARD
+import com.example.yearprogress.ui.theme.BG_DARK
+import com.example.yearprogress.ui.theme.CARD_BORDER
+import com.example.yearprogress.ui.theme.COLOR_DAY
+import com.example.yearprogress.ui.theme.COLOR_LIFE
+import com.example.yearprogress.ui.theme.COLOR_MONTH
+import com.example.yearprogress.ui.theme.COLOR_WEEK
+import com.example.yearprogress.ui.theme.COLOR_YEAR
+import com.example.yearprogress.ui.theme.TEXT_DIM
+import com.example.yearprogress.ui.theme.TEXT_MUTED
+import com.example.yearprogress.ui.theme.TEXT_PRIMARY
 import kotlinx.coroutines.delay
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 private const val UZ_LIFE_EXPECTANCY = 75.1
-private val BG_DARK      = Color(0xFF0A0A0F)
-private val BG_CARD      = Color(0xFF111118)
-private val CARD_BORDER  = Color(0xFF1E1E2A)
-private val TEXT_PRIMARY = Color(0xFFFFFFFF)
-private val TEXT_MUTED   = Color(0xFF6B7280)
-private val TEXT_DIM     = Color(0xFF374151)
-private val COLOR_YEAR   = Color(0xFF818CF8)
-private val COLOR_MONTH  = Color(0xFFFB923C)
-private val COLOR_WEEK   = Color(0xFFF472B6)
-private val COLOR_DAY    = Color(0xFF34D399)
-private val COLOR_LIFE   = Color(0xFF34D399)
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 @RequiresApi(Build.VERSION_CODES.O)
 private fun getDaySuffix(day: Int) = when {
     day in 11..13 -> "th"
@@ -154,8 +155,14 @@ private fun LiveChip() {
     ) {
         PulsingDot()
         Spacer(Modifier.width(6.dp))
-        Text("LIVE", fontSize = 10.sp, color = TEXT_MUTED,
-            letterSpacing = 2.sp, fontFamily = FontFamily.Monospace)
+
+        Text(
+            text = stringResource(R.string.live),
+            fontSize = 10.sp,
+            color = TEXT_MUTED,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
     }
 }
 
@@ -262,8 +269,13 @@ private fun TimeCard(
                         .background(accentColor.copy(0.12f))
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
-                    Text("LIVE", fontSize = 10.sp, color = accentColor,
-                        fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
+                    Text(
+                        stringResource(R.string.live),
+                        fontSize = 10.sp,
+                        color = accentColor,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
         }
@@ -291,10 +303,10 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
     ) {
         DotMode.entries.forEach { mode ->
             val active = dotMode == mode
-            val label  = when (mode) {
-                DotMode.YEAR  -> "YIL"
-                DotMode.MONTH -> "OY"
-                DotMode.WEEK  -> "HAFTA"
+            val label = when (mode) {
+                DotMode.YEAR  -> stringResource(R.string.year)
+                DotMode.MONTH -> stringResource(R.string.month)
+                DotMode.WEEK  -> stringResource(R.string.week)
             }
             Box(
                 modifier = Modifier
@@ -382,7 +394,11 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "$displayYear — ${idx + 1}-yosh",
+                                text = stringResource(
+                                    R.string.year_age,
+                                    displayYear,
+                                    idx + 1
+                                ),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = COLOR_LIFE,
@@ -401,10 +417,10 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
-                                    when {
-                                        isCurrent -> "HOZIR"
-                                        isPast    -> "O'TDI"
-                                        else      -> ""
+                                    text = when {
+                                        isCurrent -> stringResource(R.string.now)
+                                        isPast -> stringResource(R.string.passed)
+                                        else -> ""
                                     },
                                     fontSize = 9.sp,
                                     color = if (isCurrent) Color(0xFFFBBF24) else COLOR_LIFE,
@@ -430,7 +446,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                         }.coerceIn(0, 12)
 
                         Text(
-                            "OYLAR",
+                            stringResource(R.string.month),
                             fontSize = 9.sp,
                             color = TEXT_DIM,
                             letterSpacing = 2.sp,
@@ -478,7 +494,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                         }
 
                         Text(
-                            "HAFTALAR (52)",
+                            stringResource(R.string.weeks_word),
                             fontSize = 9.sp,
                             color = TEXT_DIM,
                             letterSpacing = 2.sp,
@@ -513,7 +529,11 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             val filledMonths = (ageYears * 12).toInt()
 
             Text(
-                "HER KVADRAT = 1 OY  ·  ${filledMonths} / ${totalMonths} OY",
+                stringResource(
+                    R.string.each_square_one_month,
+                    filledMonths,
+                    totalMonths
+                ),
                 fontSize = 9.sp, color = TEXT_DIM,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
@@ -540,7 +560,10 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                "${totalMonths - filledMonths} OY QOLDI",
+                stringResource(
+                    R.string.months_left,
+                    totalMonths - filledMonths
+                ),
                 fontSize = 9.sp, color = TEXT_MUTED,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
@@ -553,7 +576,11 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             val filledWeeks = (ageYears * 52.18).toInt()
 
             Text(
-                "HER NUQTA = 1 HAFTA  ·  ${filledWeeks} / ${totalWeeks} HAFTA",
+                stringResource(
+                    R.string.each_dot_one_week,
+                    filledWeeks,
+                    totalWeeks
+                ),
                 fontSize = 9.sp, color = TEXT_DIM,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
@@ -580,7 +607,10 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                "${totalWeeks - filledWeeks} HAFTA QOLDI",
+                stringResource(
+                    R.string.weeks_left,
+                    totalWeeks - filledWeeks
+                ),
                 fontSize = 9.sp, color = TEXT_MUTED,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
@@ -615,9 +645,13 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             .border(1.dp, CARD_BORDER, RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
-        Text("HAYOT TAHLILI · O'ZBEKISTON",
-            fontSize = 10.sp, color = TEXT_MUTED,
-            letterSpacing = 2.sp, fontFamily = FontFamily.Monospace)
+        Text(
+            stringResource(R.string.life_analysis_uzbekistan),
+            fontSize = 10.sp,
+            color = TEXT_MUTED,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -626,7 +660,11 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf(years to "YIL", months to "OY", days to "KUN").forEach { (v, l) ->
+            listOf(
+                years to stringResource(R.string.year),
+                months to stringResource(R.string.month),
+                days to stringResource(R.string.day)
+            ).forEach { (v, l) ->
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -653,10 +691,26 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${String.format(Locale.US,"%.2f", ageYears)} yosh",
-                fontSize = 11.sp, color = TEXT_MUTED, fontFamily = FontFamily.Monospace)
-            Text("$UZ_LIFE_EXPECTANCY yosh o'rtacha",
-                fontSize = 11.sp, color = TEXT_MUTED, fontFamily = FontFamily.Monospace)
+
+            Text(
+                text = stringResource(
+                    R.string.age_years_old,
+                    ageYears
+                ),
+                fontSize = 11.sp,
+                color = TEXT_MUTED,
+                fontFamily = FontFamily.Monospace
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.average_life_expectancy,
+                    UZ_LIFE_EXPECTANCY
+                ),
+                fontSize = 11.sp,
+                color = TEXT_MUTED,
+                fontFamily = FontFamily.Monospace
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -699,9 +753,13 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
-        Text("hayot o'tdi",
-            fontSize = 12.sp, color = TEXT_MUTED,
-            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        Text(
+            stringResource(R.string.life_is_gone),
+            fontSize = 12.sp,
+            color = TEXT_MUTED,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
 
         Spacer(Modifier.height(20.dp))
 
@@ -723,15 +781,33 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf(remYears to "YIL", remWeeks to "HAFTA", remDays to "KUN").forEach { (v, l) ->
+
+                listOf(
+                    remYears to stringResource(R.string.year),
+                    remWeeks to stringResource(R.string.week),
+                    remDays to stringResource(R.string.day)
+                ).forEach { (v, l) ->
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
                         Text(
-                            String.format(Locale.US, "%,d", v),
-                            fontSize = 22.sp, fontWeight = FontWeight.Black,
-                            color = COLOR_LIFE, fontFamily = FontFamily.Monospace
+                            text = String.format(Locale.US, "%,d", v),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            color = COLOR_LIFE,
+                            fontFamily = FontFamily.Monospace
                         )
-                        Text("QOLDI ($l)", fontSize = 8.sp, color = TEXT_MUTED,
-                            letterSpacing = 1.sp, fontFamily = FontFamily.Monospace)
+
+                        Text(
+                            text = stringResource(
+                                R.string.remaining_years_remaning,
+                                l
+                            ),
+                            fontSize = 8.sp,
+                            color = TEXT_MUTED,
+                            letterSpacing = 1.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
                     }
                 }
             }
@@ -753,9 +829,11 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 .padding(14.dp)
         ) {
             Text(
-                "\"Daraxt ekish uchun eng yaxshi vaqt 20 yil oldin edi. Ikkinchi eng yaxshi vaqt — hozirdir.\"",
-                fontSize = 12.sp, color = TEXT_MUTED,
-                fontStyle = FontStyle.Italic, lineHeight = 18.sp
+                stringResource(R.string.quote),
+                fontSize = 12.sp,
+                color = TEXT_MUTED,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 18.sp
             )
         }
 
@@ -769,8 +847,12 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             colors = ButtonDefaults.outlinedButtonColors(contentColor = TEXT_MUTED),
             border = BorderStroke(1.dp, CARD_BORDER)
         ) {
-            Text("← SANANI O'ZGARTIRISH",
-                fontSize = 11.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
+            Text(
+                stringResource(R.string.change_date),
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 1.sp
+            )
         }
     }
 }
@@ -810,15 +892,22 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
             .border(1.dp, CARD_BORDER, RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
-        Text("HAYOT TAHLILI",
-            fontSize = 10.sp, color = TEXT_MUTED,
-            letterSpacing = 2.sp, fontFamily = FontFamily.Monospace)
+        Text(
+            stringResource(R.string.life_analysis),
+            fontSize = 10.sp,
+            color = TEXT_MUTED,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
 
         Spacer(Modifier.height(6.dp))
 
-        Text("Tug'ilgan sanangizni kiriting",
-            fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TEXT_PRIMARY)
-
+        Text(
+            stringResource(R.string.enter_your_birth_date),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TEXT_PRIMARY
+        )
         Spacer(Modifier.height(20.dp))
 
         Row(
@@ -839,7 +928,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(dayFocus),
-                label = { Text("KUN", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                label = { Text(stringResource(R.string.day), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                 placeholder = { Text("01", fontSize = 18.sp, color = TEXT_DIM,
                     fontFamily = FontFamily.Monospace) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -865,7 +954,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(monthFocus),
-                label = { Text("OY", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                label = { Text(stringResource(R.string.month), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                 placeholder = { Text("09", fontSize = 18.sp, color = TEXT_DIM,
                     fontFamily = FontFamily.Monospace) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -891,7 +980,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 modifier = Modifier
                     .weight(2f)
                     .focusRequester(yearFocus),
-                label = { Text("YIL", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                label = { Text(stringResource(R.string.year), fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                 placeholder = { Text("1995", fontSize = 18.sp, color = TEXT_DIM,
                     fontFamily = FontFamily.Monospace) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -911,21 +1000,33 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
 
         Spacer(Modifier.height(16.dp))
 
+        val invalidDateText = stringResource(R.string.please_enter_valid_date)
+        val futureDateText = stringResource(R.string.date_cannot_be_in_the_future)
+        val wrongDateText = stringResource(R.string.invalid_date)
         Button(
             onClick = {
                 val d = day.toIntOrNull() ?: 0
                 val m = month.toIntOrNull() ?: 0
                 val y = year.toIntOrNull() ?: 0
+
                 when {
                     d !in 1..31 || m !in 1..12 || y !in 1900..LocalDate.now().year ->
-                        error = "Iltimos to'g'ri sana kiriting"
+                        error = invalidDateText
+
                     else -> {
                         runCatching {
                             val date = LocalDate.of(y, m, d)
+
                             if (date.isAfter(LocalDate.now()))
-                                error = "Sana kelajakda bo'lishi mumkin emas"
-                            else { error = ""; onSubmit(date) }
-                        }.onFailure { error = "Noto'g'ri sana" }
+                                error = futureDateText
+                            else {
+                                error = ""
+                                onSubmit(date)
+                            }
+
+                        }.onFailure {
+                            error = wrongDateText
+                        }
                     }
                 }
             },
@@ -938,9 +1039,13 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 contentColor   = Color.Black
             )
         ) {
-            Text("HAYOTIMNI KO'RSAT →",
-                fontSize = 13.sp, fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
+            Text(
+                stringResource(R.string.show_my_life),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 1.sp
+            )
         }
     }
 }
@@ -958,19 +1063,19 @@ fun ProgressTracker() {
     val dayNames = listOf("SUN","MON","TUE","WED","THU","FRI","SAT")
 
     val cards = listOf(
-        Triple("YEAR",  now.year.toString(),
+        Triple(stringResource(R.string.year),  now.year.toString(),
             yearProgress(now) to ChronoUnit.SECONDS.between(
                 LocalDateTime.of(now.year,1,1,0,0),
                 LocalDateTime.of(now.year,12,31,23,59,59)
             ) to COLOR_YEAR),
-        Triple("MONTH", months[now.monthValue - 1],
+        Triple(stringResource(R.string.month), months[now.monthValue - 1],
             monthProgress(now) to ChronoUnit.SECONDS.between(
                 LocalDateTime.of(now.year, now.month,1,0,0),
                 LocalDateTime.of(now.year, now.month,1,0,0).plusMonths(1).minusSeconds(1)
             ) to COLOR_MONTH),
-        Triple("WEEK",  dayNames[now.dayOfWeek.value % 7],
+        Triple(stringResource(R.string.week),  dayNames[now.dayOfWeek.value % 7],
             weekProgress(now) to 604800L to COLOR_WEEK),
-        Triple("DAY",   "${now.dayOfMonth}${getDaySuffix(now.dayOfMonth)}",
+        Triple(stringResource(R.string.day),   "${now.dayOfMonth}${getDaySuffix(now.dayOfMonth)}",
             dayProgress(now) to 86400L to COLOR_DAY),
     )
 
@@ -1008,23 +1113,35 @@ fun ProgressTracker() {
             // Header
             Text(
                 buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = 36.sp, fontWeight = FontWeight.Black,
-                        color = TEXT_PRIMARY, letterSpacing = (-1.5).sp)) {
-                        append("Vaqt\n")
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TEXT_PRIMARY
+                        )
+                    ) {
+                        append(stringResource(R.string.time) + "\n")
                     }
-                    withStyle(SpanStyle(fontSize = 36.sp, fontWeight = FontWeight.Black,
-                        color = TEXT_PRIMARY.copy(0.25f), letterSpacing = (-1.5).sp)) {
-                        append("o'tmoqda.")
+
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            color = TEXT_PRIMARY.copy(0.25f)
+                        )
+                    ) {
+                        append(stringResource(R.string.is_passing))
                     }
-                },
-                lineHeight = 42.sp
+                }
             )
 
             Spacer(Modifier.height(8.dp))
 
-            Text("Har soniya, daqiqa, soat — qaytmaydi.",
-                fontSize = 13.sp, color = TEXT_MUTED, lineHeight = 20.sp)
-
+            Text(
+                stringResource(R.string.every_second_minute_hour_is_not_coming_back),
+                fontSize = 13.sp,
+                color = TEXT_MUTED
+            )
             Spacer(Modifier.height(24.dp))
 
             // Time cards
@@ -1057,13 +1174,22 @@ fun ProgressTracker() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("O'ZBEKISTON O'RTACHA UMRI: $UZ_LIFE_EXPECTANCY YOSH",
-                    fontSize = 10.sp, color = TEXT_DIM,
-                    letterSpacing = 1.sp, fontFamily = FontFamily.Monospace)
+                Text(
+                    stringResource(
+                        R.string.uzbekistan_average_life_expectancy,
+                        UZ_LIFE_EXPECTANCY
+                    ),
+                    fontSize = 10.sp,
+                    color = TEXT_DIM,
+                    fontFamily = FontFamily.Monospace
+                )
                 Spacer(Modifier.height(4.dp))
-                Text("JAHON BANKI MA'LUMOTLARI ASOSIDA",
-                    fontSize = 9.sp, color = TEXT_DIM.copy(0.6f),
-                    letterSpacing = 1.sp, fontFamily = FontFamily.Monospace)
+                Text(
+                    stringResource(R.string.based_on_world_bank_data),
+                    fontSize = 9.sp,
+                    color = TEXT_DIM.copy(0.6f),
+                    fontFamily = FontFamily.Monospace
+                )
             }
 
             Spacer(Modifier.height(40.dp))

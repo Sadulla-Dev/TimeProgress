@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Time Progress</string>
+    <string name="all">All</string>
+    <string name="live">LIVE</string>
+    <string name="year">YEAR</string>
+    <string name="month">MONTH</string>
+    <string name="week">WEEK</string>
+    <string name="day">DAY</string>
+    <string name="life_analysis_uzbekistan">LIFE ANALYSIS · UZBEKISTAN</string>
+    <string name="age_years_old">%1$.2f years old</string>
+    <string name="average_life_expectancy">%1$.1f years average</string>
+    <string name="life_progress_percentage">%1$.4f%%</string>
+    <string name="life_is_gone">life is gone</string>
+    <string name="each_square_one_month">EACH SQUARE = 1 MONTH · %1$d / %2$d MONTHS</string>
+    <string name="months_left">%1$d MONTHS LEFT</string>
+    <string name="each_dot_one_week">EACH DOT = 1 WEEK · %1$d / %2$d WEEKS</string>
+    <string name="weeks_left">%1$d WEEKS LEFT</string>
+    <string name="year_age">%1$d — %2$d-yosh</string>
+    <string name="now">NOW</string>
+    <string name="passed">PASSED</string>
+    <string name="months_word">MONTHS</string>
+    <string name="weeks_word">WEEKS (52)</string>
+    <string name="remaining_years_remaning">REMANING (%1$S)</string>
+    <string name="quote">"The best time to plant a tree was 20 years ago. The second best time is now."</string>
+    <string name="change_date">← CHANGE DATE</string>
+    <string name="life_analysis">LIFE ANALYSIS</string>
+    <string name="enter_your_birth_date">Enter your birth date</string>
+    <string name="day_input_placeholder">01</string>
+    <string name="month_input_placeholder">09</string>
+    <string name="year_input_placeholder">1995</string>
+    <string name="please_enter_valid_date">Please enter a valid date</string>
+    <string name="date_cannot_be_in_the_future">Date cannot be in the future</string>
+    <string name="invalid_date">Invalid date</string>
+    <string name="show_my_life">SHOW MY LIFE →</string>
+    <string name="time">Time</string>
+    <string name="is_passing">is passing.</string>
+    <string name="every_second_minute_hour_is_not_coming_back">Every second, minute, hour — is not coming back.</string>
+    <string name="uzbekistan_average_life_expectancy">UZBEKISTAN AVERAGE LIFE EXPECTANCY: %1$.1f YEARS</string>
+    <string name="based_on_world_bank_data">BASED ON WORLD BANK DATA</string>
+    <string name="language_selection">Language</string>
+    <string name="choose_language">Select Language</string>
+
+</resources>
