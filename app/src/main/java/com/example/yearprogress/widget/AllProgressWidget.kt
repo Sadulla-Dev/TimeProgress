@@ -45,25 +45,23 @@ class AllProgressWidgetReceiver : GlanceAppWidgetReceiver() {
 object AllProgressWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Responsive(
         setOf(
-            DpSize(120.dp, 60.dp),  // 2x1
-            DpSize(120.dp, 120.dp), // 2x2
+            DpSize(60.dp, 60.dp),   // 2x1  ← width ni kichikroq qiling
+            DpSize(60.dp, 120.dp),  // 2x2
             DpSize(180.dp, 60.dp),  // 3x1
             DpSize(250.dp, 60.dp),  // 4x1
         )
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val size = LocalSize.current
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val size = LocalSize.current
 
-            val isWide = size.width >= 110.dp   // 3x1, 4x1
-            val isTall = size.height >= 100.dp  // 2x2
-
-            if (isWide && !isTall) {
-                FourByOneLayout()  // 3x1, 4x1
-            } else {
-                TwoByTwoLayout()   // 2x1, 2x2
+                when {
+                    size.width >= 180.dp && size.height < 120.dp -> FourByOneLayout() // 3x1, 4x1
+                    size.height >= 120.dp -> TwoByTwoLayout()                         // 2x2
+                    else -> TwoByTwoLayout()                                           // 2x1
+                }
             }
         }
     }

@@ -1,18 +1,19 @@
 package com.example.yearprogress.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,10 +22,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.yearprogress.R
+import com.example.yearprogress.ui.theme.BG_CARD
 import com.example.yearprogress.ui.theme.BG_DARK
+import com.example.yearprogress.ui.theme.CARD_BORDER
+import com.example.yearprogress.ui.theme.COLOR_LIFE
+import com.example.yearprogress.ui.theme.TEXT_DIM
+import com.example.yearprogress.ui.theme.TEXT_MUTED
 import com.example.yearprogress.ui.theme.TEXT_PRIMARY
 
 @Composable
@@ -32,47 +41,127 @@ fun LanguageDialog(
     onDismiss: () -> Unit,
     onLanguageSelected: (String) -> Unit
 ) {
-    val languages = listOf("en" to "English", "ru" to "Русский", "uz" to "O'zbek")
+    val languages = listOf(
+        "en" to "English",
+        "ru" to "Русский",
+        "uz" to "O'zbek"
+    )
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(BG_DARK)
-                .padding(20.dp)
+                .background(BG_CARD)
+                .border(1.dp, CARD_BORDER, RoundedCornerShape(20.dp))
         ) {
+            // Top glow — same as ProgressTracker background glow
             Box(
                 modifier = Modifier
+                    .size(280.dp)
                     .align(Alignment.TopCenter)
-                    .offset(y = (-20).dp)
                     .background(
                         Brush.radialGradient(
-                            listOf(Color(0xFF6366F1).copy(0.06f), Color.Transparent)
-                        ), CircleShape
+                            listOf(Color(0xFF6366F1).copy(0.07f), Color.Transparent)
+                        ),
+                        CircleShape
                     )
             )
-            Column {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                // Section label — matches TimeCard / BirthDateInput header style
                 Text(
-                    stringResource(R.string.choose_language),
+                    text = stringResource(R.string.choose_language),
+                    fontSize = 10.sp,
+                    color = TEXT_MUTED,
+                    letterSpacing = 2.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = "Language / Язык / Til",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = TEXT_PRIMARY
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(20.dp))
 
-                languages.forEach { (code, name) ->
+                languages.forEachIndexed { index, (code, name) ->
+                    LanguageItem(
+                        name = name,
+                        onClick = {
+                            onLanguageSelected(code)
+                            onDismiss()
+                        }
+                    )
+                    if (index < languages.lastIndex) {
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Dismiss button — matches OutlinedButton style in the app
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF16161F))
+                        .border(1.dp, CARD_BORDER, RoundedCornerShape(12.dp))
+                        .clickable { onDismiss() }
+                        .padding(vertical = 13.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = name,
-                        color = TEXT_PRIMARY,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onLanguageSelected(code)
-                                onDismiss()
-                            }
-                            .padding(14.dp)
+                        text = "✕  CLOSE",
+                        fontSize = 11.sp,
+                        color = TEXT_DIM,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 2.sp
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LanguageItem(
+    name: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF16161F))
+            .border(1.dp, CARD_BORDER, RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Accent dot — matches PulsingDot / LIVE badge color
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(COLOR_LIFE.copy(alpha = 0.5f))
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = name,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = TEXT_PRIMARY,
+                fontFamily = FontFamily.Monospace
+            )
         }
     }
 }
