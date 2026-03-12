@@ -8,14 +8,18 @@ import android.graphics.RectF
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
@@ -27,13 +31,8 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
+import com.example.yearprogress.MainActivity
 import com.example.yearprogress.utils.calculateDayProgress
-import java.time.LocalDateTime
-import android.graphics.*
-import android.view.WindowManager
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.dp
-import androidx.glance.*
 import com.example.yearprogress.utils.calculateMonthProgress
 import com.example.yearprogress.utils.calculateWeekProgress
 import com.example.yearprogress.utils.calculateYearProgress
@@ -66,6 +65,7 @@ object AllProgressWidget : GlanceAppWidget() {
         }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FourByOneLayout() {
@@ -73,7 +73,6 @@ fun FourByOneLayout() {
     // Dinamik ranglarni olish
     val colors = GlanceTheme.colors
     val primary = colors.primary.getColor(context).toArgb()
-    val onSurface = colors.onSurface.getColor(context).toArgb()
     val outline = colors.outline.getColor(context).toArgb()
 
     val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day", primary, outline)
@@ -83,7 +82,7 @@ fun FourByOneLayout() {
 
     Row(
         modifier = GlanceModifier
-            .fillMaxSize()
+            .fillMaxSize().clickable(actionStartActivity<MainActivity>())
             .background(GlanceTheme.colors.widgetBackground)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -110,7 +109,7 @@ fun TwoByTwoLayout() {
 
     Column(
         modifier = GlanceModifier
-            .fillMaxSize()
+            .fillMaxSize().clickable(actionStartActivity<MainActivity>())
             .background(GlanceTheme.colors.widgetBackground)
             .padding(8.dp)
     ) {
