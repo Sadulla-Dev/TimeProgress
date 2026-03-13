@@ -64,6 +64,7 @@ fun DayGridWidget(context: Context) {
     val now = LocalDate.now()
     val dayOfYear = now.dayOfYear
     val totalDays = now.lengthOfYear()
+    val colors = GlanceTheme.colors
 
     val size = LocalSize.current
     val widthDp = size.width.value.toInt().coerceAtLeast(100)
@@ -74,11 +75,17 @@ fun DayGridWidget(context: Context) {
             .padding(12.dp)
             .background(GlanceTheme.colors.widgetBackground)
     ) {
-        Row(modifier = GlanceModifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column {
                 Text(
                     text = "${now.year} In Days",
-                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                    style = TextStyle(
+                        fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.onSurface
+                    ),
                 )
                 Row {
                     Text(
@@ -86,11 +93,14 @@ fun DayGridWidget(context: Context) {
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
+                            color = colors.onSurface
                         )
                     )
                     Text(
                         text = " / $totalDays days",
-                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        style = TextStyle(
+                            fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.onSurface
+                        )
                     )
 
                 }
@@ -98,11 +108,12 @@ fun DayGridWidget(context: Context) {
             Spacer(modifier = GlanceModifier.defaultWeight())
             Text(
                 text = "$progressPercent%",
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.onSurface
+                ),
             )
 
         }
-
 
         Spacer(modifier = GlanceModifier.height(8.dp))
 

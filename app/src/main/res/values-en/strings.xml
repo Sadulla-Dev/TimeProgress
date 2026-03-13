@@ -40,5 +40,10 @@
     <string name="language_selection">Language</string>
     <string name="choose_language">Select Language</string>
     <string name="change_language">Change language</string>
+    <string name="change_theme">Change theme</string>
+    <string name="close">Close</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="theme">Theme</string>
 
 </resources>

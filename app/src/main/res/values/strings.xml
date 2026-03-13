@@ -40,4 +40,9 @@
     <string name="language_selection">Til</string>
     <string name="choose_language">Til tanlang</string>
     <string name="change_language">Tilni o\'zgartirish</string>
+    <string name="change_theme">Mavzuni o\'zgartirish</string>
+    <string name="close">Yopish</string>
+    <string name="light">Yorug\'lik</string>
+    <string name="dark">Qorong\'u</string>
+    <string name="theme">Mavzu</string>
 </resources>

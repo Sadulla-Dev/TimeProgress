@@ -40,4 +40,9 @@
     <string name="language_selection">Язык</string>
     <string name="choose_language">Выберите язык</string>
     <string name="change_language">Изменить язык</string>
+    <string name="change_theme">Изменить тему</string>
+    <string name="close">Закрывать</string>
+    <string name="light">Свет</string>
+    <string name="dark">Темный</string>
+    <string name="theme">Тема</string>
 </resources>

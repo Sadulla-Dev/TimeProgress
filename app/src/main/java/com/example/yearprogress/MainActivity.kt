@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import com.example.yearprogress.components.ProgressTracker
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.LanguageManager
 import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
@@ -36,12 +39,15 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(LanguageManager.changeLanguage(newBase, language))
     }
 
+    private val viewModel: MainViewModel by viewModels()
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            YearProgressTheme {
+            val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+            YearProgressTheme(themeMode = themeMode) {
                 MainScreen()
             }
         }
@@ -54,9 +60,17 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 
     val context = LocalContext.current
 
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     Box(modifier = Modifier.fillMaxSize()) {
 
-        ProgressTracker(viewModel)
+        ProgressTracker(
+            currentMode = themeMode,
+            onChangeTheme = {viewModel.setThemeMode(it)},
+            onChangeLanguage = { lang ->
+                viewModel.changeLanguage(lang)
+                (context as Activity).recreate()
+            }
+        )
 
         if (viewModel.isFirstLaunch) {
             LanguageDialog(

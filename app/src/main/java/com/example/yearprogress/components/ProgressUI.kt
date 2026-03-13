@@ -70,19 +70,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.yearprogress.MainViewModel
 import com.example.yearprogress.R
-import com.example.yearprogress.ui.theme.BG_CARD
-import com.example.yearprogress.ui.theme.BG_DARK
-import com.example.yearprogress.ui.theme.CARD_BORDER
-import com.example.yearprogress.ui.theme.COLOR_DAY
-import com.example.yearprogress.ui.theme.COLOR_LIFE
-import com.example.yearprogress.ui.theme.COLOR_MONTH
-import com.example.yearprogress.ui.theme.COLOR_WEEK
-import com.example.yearprogress.ui.theme.COLOR_YEAR
-import com.example.yearprogress.ui.theme.TEXT_DIM
-import com.example.yearprogress.ui.theme.TEXT_MUTED
-import com.example.yearprogress.ui.theme.TEXT_PRIMARY
+import com.example.yearprogress.ui.theme.ProgressColors
+import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
 import com.example.yearprogress.utils.ageComponents
 import com.example.yearprogress.utils.dayProgress
@@ -98,11 +90,12 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProgressTracker(
-    viewModel: MainViewModel
+    currentMode: ThemeMode,
+    onChangeTheme: (ThemeMode) -> Unit,
+    onChangeLanguage: (String) -> Unit
 ) {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {
@@ -110,6 +103,7 @@ fun ProgressTracker(
             delay(1000); now = LocalDateTime.now()
         }
     }
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     var birthDate by remember { mutableStateOf<LocalDate?>(null) }
 
@@ -126,29 +120,29 @@ fun ProgressTracker(
             yearProgress(now) to ChronoUnit.SECONDS.between(
                 LocalDateTime.of(now.year, 1, 1, 0, 0),
                 LocalDateTime.of(now.year, 12, 31, 23, 59, 59)
-            ) to COLOR_YEAR
+            ) to ProgressColors.colorYear
         ),
         Triple(
             stringResource(R.string.month), months[now.monthValue - 1],
             monthProgress(now) to ChronoUnit.SECONDS.between(
                 LocalDateTime.of(now.year, now.month, 1, 0, 0),
                 LocalDateTime.of(now.year, now.month, 1, 0, 0).plusMonths(1).minusSeconds(1)
-            ) to COLOR_MONTH
+            ) to ProgressColors.colorMonth
         ),
         Triple(
             stringResource(R.string.week), dayNames[now.dayOfWeek.value % 7],
-            weekProgress(now) to 604800L to COLOR_WEEK
+            weekProgress(now) to 604800L to ProgressColors.colorWeek
         ),
         Triple(
             stringResource(R.string.day), "${now.dayOfMonth}${getDaySuffix(now.dayOfMonth)}",
-            dayProgress(now) to 86400L to COLOR_DAY
+            dayProgress(now) to 86400L to ProgressColors.colorDay
         ),
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BG_DARK)
+            .background(ProgressColors.bgDark)
     ) {
 
         // Background glow top
@@ -184,7 +178,7 @@ fun ProgressTracker(
                         SpanStyle(
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Black,
-                            color = TEXT_PRIMARY
+                            color = ProgressColors.textPrimary
                         )
                     ) {
                         append(stringResource(R.string.time) + "\n")
@@ -194,7 +188,7 @@ fun ProgressTracker(
                         SpanStyle(
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Black,
-                            color = TEXT_PRIMARY.copy(0.25f)
+                            color = ProgressColors.textPrimary.copy(0.25f)
                         )
                     ) {
                         append(stringResource(R.string.is_passing))
@@ -207,7 +201,7 @@ fun ProgressTracker(
             Text(
                 stringResource(R.string.every_second_minute_hour_is_not_coming_back),
                 fontSize = 13.sp,
-                color = TEXT_MUTED
+                color = ProgressColors.textMuted
             )
             Spacer(Modifier.height(24.dp))
 
@@ -247,25 +241,43 @@ fun ProgressTracker(
                         UZ_LIFE_EXPECTANCY
                     ),
                     fontSize = 10.sp,
-                    color = TEXT_DIM,
+                    color = ProgressColors.textDim,
                     fontFamily = FontFamily.Monospace
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.based_on_world_bank_data),
                     fontSize = 9.sp,
-                    color = TEXT_DIM.copy(0.6f),
+                    color = ProgressColors.textDim.copy(0.6f),
                     fontFamily = FontFamily.Monospace
                 )
 
-                TextButton (
-                    onClick = {showDialog = true},
-                ){
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { showDialog = true }
+                ) {
                     Text(
                         stringResource(R.string.change_language),
                         fontSize = 10.sp,
-                        color = TEXT_MUTED,
-                        fontFamily = FontFamily.Monospace
+                        color = ProgressColors.textMuted,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(5.dp),
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { showThemeDialog = true }
+                ) {
+                    Text(
+                        stringResource(R.string.change_theme),
+                        fontSize = 10.sp,
+                        color = ProgressColors.textMuted,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(5.dp),
                     )
                 }
             }
@@ -273,14 +285,19 @@ fun ProgressTracker(
             Spacer(Modifier.height(40.dp))
 
         }
+        // Dialog
+        if (showThemeDialog) {
+            ThemeDialog(
+                currentMode = currentMode,
+                onDismiss = { showThemeDialog = false },
+                onModeSelected = onChangeTheme
+            )
+        }
         // ─── Language Dialog ─────────────────────────────────────────────
         if (showDialog) {
             LanguageDialog(
                 onDismiss = { showDialog = false },
-                onLanguageSelected = { lang ->
-                    viewModel.changeLanguage(lang)
-                    (context as Activity).recreate()
-                }
+                onLanguageSelected = onChangeLanguage
             )
         }
     }
@@ -309,7 +326,7 @@ private fun PulsingDot() {
         modifier = Modifier
             .size(7.dp)
             .clip(CircleShape)
-            .background(COLOR_LIFE.copy(alpha = alpha))
+            .background(ProgressColors.colorLife.copy(alpha = alpha))
     )
 }
 
@@ -320,8 +337,8 @@ private fun LiveChip() {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
-            .background(Color(0xFF1A1A24))
-            .border(1.dp, CARD_BORDER, RoundedCornerShape(99.dp))
+            .background(ProgressColors.bgCard)
+            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(99.dp))
             .padding(horizontal = 12.dp, vertical = 5.dp)
     ) {
         PulsingDot()
@@ -330,7 +347,7 @@ private fun LiveChip() {
         Text(
             text = stringResource(R.string.live),
             fontSize = 10.sp,
-            color = TEXT_MUTED,
+            color = ProgressColors.textMuted,
             letterSpacing = 2.sp,
             fontFamily = FontFamily.Monospace
         )
@@ -353,8 +370,8 @@ private fun TimeCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(BG_CARD)
-            .border(1.dp, CARD_BORDER, RoundedCornerShape(20.dp))
+            .background(ProgressColors.bgCard)
+            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(20.dp))
             .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
         Column {
@@ -365,21 +382,26 @@ private fun TimeCard(
             ) {
                 Column {
                     Text(
-                        title, fontSize = 10.sp, color = TEXT_DIM,
+                        title, fontSize = 10.sp, color = ProgressColors.textDim,
                         letterSpacing = 2.sp, fontFamily = FontFamily.Monospace
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TEXT_DIM)
+                    Text(
+                        label,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ProgressColors.textDim
+                    )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         "${String.format(Locale.US, "%,d", elapsed)}s",
-                        fontSize = 11.sp, color = TEXT_DIM,
+                        fontSize = 11.sp, color = ProgressColors.textDim,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         "/ ${String.format(Locale.US, "%,d", totalSeconds)}s",
-                        fontSize = 10.sp, color = TEXT_DIM,
+                        fontSize = 10.sp, color = ProgressColors.textDim,
                         fontFamily = FontFamily.Monospace
                     )
                 }
@@ -393,7 +415,7 @@ private fun TimeCard(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(Color(0xFF1E1E2E))
+                    .background(ProgressColors.progress)
             ) {
                 Box(
                     modifier = Modifier
@@ -417,8 +439,10 @@ private fun TimeCard(
                     buildAnnotatedString {
                         withStyle(
                             SpanStyle(
-                                fontSize = 30.sp, fontWeight = FontWeight.Black,
-                                color = TEXT_PRIMARY, fontFamily = FontFamily.Monospace
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Black,
+                                color = ProgressColors.textPrimary,
+                                fontFamily = FontFamily.Monospace
                             )
                         ) {
                             append(intPart)
@@ -426,7 +450,7 @@ private fun TimeCard(
                         withStyle(
                             SpanStyle(
                                 fontSize = 20.sp, fontWeight = FontWeight.Medium,
-                                color = TEXT_MUTED, fontFamily = FontFamily.Monospace
+                                color = ProgressColors.textMuted, fontFamily = FontFamily.Monospace
                             )
                         ) {
                             append("$decPart%")
@@ -462,7 +486,6 @@ private enum class DotMode { YEAR, MONTH, WEEK }
 private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
     val totalYears = UZ_LIFE_EXPECTANCY.toInt()          // 75 circles
     val filledYears = ageYears.toInt()
-    val partialFraction = ageYears - filledYears          // 0..1 within current year
 
     var selectedYear by remember { mutableStateOf<Int?>(null) }
     var dotMode by remember { mutableStateOf(DotMode.YEAR) }
@@ -482,10 +505,12 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if (active) COLOR_LIFE.copy(0.15f) else Color(0xFF16161F))
+                    .background(
+                        if (active) ProgressColors.colorLife.copy(0.15f) else ProgressColors.progress
+                    )
                     .border(
                         1.dp,
-                        if (active) COLOR_LIFE.copy(0.4f) else CARD_BORDER,
+                        if (active) ProgressColors.colorLife.copy(0.4f) else ProgressColors.cardBorder,
                         RoundedCornerShape(8.dp)
                     )
                     .clickable { dotMode = mode; selectedYear = null }
@@ -495,7 +520,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                 Text(
                     label,
                     fontSize = 10.sp,
-                    color = if (active) COLOR_LIFE else TEXT_MUTED,
+                    color = if (active) ProgressColors.colorLife else ProgressColors.textMuted,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Normal
@@ -516,15 +541,14 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                 maxItemsInEachRow = 15
             ) {
                 repeat(totalYears) { i ->
-                    val yearNum = birthDate.year + i
                     val isPast = i < filledYears
                     val isCurrent = i == filledYears
                     val isSelected = selectedYear == i
                     val dotColor = when {
-                        isSelected -> Color.White
-                        isPast -> COLOR_LIFE.copy(alpha = 0.85f)
-                        isCurrent -> COLOR_LIFE.copy(alpha = partialFraction.toFloat())
-                        else -> Color(0xFF1E1E2E)
+                        isSelected -> Color.Gray
+                        isPast -> ProgressColors.colorLife.copy(alpha = 0.85f)
+                        isCurrent -> ProgressColors.colorLife
+                        else -> ProgressColors.progress
                     }
                     Box(
                         modifier = Modifier
@@ -554,8 +578,12 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(COLOR_LIFE.copy(0.06f))
-                        .border(1.dp, COLOR_LIFE.copy(0.2f), RoundedCornerShape(14.dp))
+                        .background(ProgressColors.colorLife.copy(0.06f))
+                        .border(
+                            1.dp,
+                            ProgressColors.colorLife.copy(0.2f),
+                            RoundedCornerShape(14.dp)
+                        )
                         .padding(16.dp)
                 ) {
                     Column {
@@ -572,7 +600,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                 ),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = COLOR_LIFE,
+                                color = ProgressColors.colorLife,
                                 fontFamily = FontFamily.Monospace
                             )
                             Box(
@@ -581,7 +609,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                     .background(
                                         when {
                                             isCurrent -> Color(0xFF92400E).copy(0.3f)
-                                            isPast -> COLOR_LIFE.copy(0.12f)
+                                            isPast -> ProgressColors.colorLife.copy(0.12f)
                                             else -> Color.Transparent
                                         }
                                     )
@@ -594,7 +622,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                         else -> ""
                                     },
                                     fontSize = 9.sp,
-                                    color = if (isCurrent) Color(0xFFFBBF24) else COLOR_LIFE,
+                                    color = if (isCurrent) Color(0xFFFBBF24) else ProgressColors.colorLife,
                                     fontFamily = FontFamily.Monospace,
                                     letterSpacing = 1.sp
                                 )
@@ -620,7 +648,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                         Text(
                             stringResource(R.string.month),
                             fontSize = 9.sp,
-                            color = TEXT_DIM,
+                            color = ProgressColors.textDim,
                             letterSpacing = 2.sp,
                             fontFamily = FontFamily.Monospace
                         )
@@ -638,7 +666,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                             .size(18.dp)
                                             .clip(RoundedCornerShape(4.dp))
                                             .background(
-                                                if (mFilled) COLOR_MONTH.copy(0.7f)
+                                                if (mFilled) ProgressColors.colorMonth.copy(0.7f)
                                                 else Color(0xFF1A1A24)
                                             )
                                     )
@@ -646,7 +674,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                     Text(
                                         monthNames[m],
                                         fontSize = 7.sp,
-                                        color = if (mFilled) TEXT_MUTED else TEXT_DIM,
+                                        color = if (mFilled) ProgressColors.textMuted else ProgressColors.textDim,
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }
@@ -675,7 +703,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                         Text(
                             stringResource(R.string.weeks_word),
                             fontSize = 9.sp,
-                            color = TEXT_DIM,
+                            color = ProgressColors.textDim,
                             letterSpacing = 2.sp,
                             fontFamily = FontFamily.Monospace
                         )
@@ -691,7 +719,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                                         .size(9.dp)
                                         .clip(RoundedCornerShape(2.dp))
                                         .background(
-                                            if (w < weeksLived) COLOR_WEEK.copy(0.7f)
+                                            if (w < weeksLived) ProgressColors.colorWeek.copy(0.7f)
                                             else Color(0xFF1A1A24)
                                         )
                                 )
@@ -713,7 +741,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                     filledMonths,
                     totalMonths
                 ),
-                fontSize = 9.sp, color = TEXT_DIM,
+                fontSize = 9.sp, color = ProgressColors.textDim,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
             )
@@ -731,7 +759,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                             .size(7.dp)
                             .clip(RoundedCornerShape(1.dp))
                             .background(
-                                if (i < filledMonths) COLOR_MONTH.copy(0.75f)
+                                if (i < filledMonths) ProgressColors.colorMonth.copy(0.75f)
                                 else Color(0xFF1A1A24)
                             )
                     )
@@ -743,7 +771,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                     R.string.months_left,
                     totalMonths - filledMonths
                 ),
-                fontSize = 9.sp, color = TEXT_MUTED,
+                fontSize = 9.sp, color = ProgressColors.textMuted,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
             )
@@ -760,7 +788,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                     filledWeeks,
                     totalWeeks
                 ),
-                fontSize = 9.sp, color = TEXT_DIM,
+                fontSize = 9.sp, color = ProgressColors.textDim,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
             )
@@ -778,7 +806,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                             .size(5.dp)
                             .clip(CircleShape)
                             .background(
-                                if (i < filledWeeks) COLOR_WEEK.copy(0.7f)
+                                if (i < filledWeeks) ProgressColors.colorWeek.copy(0.7f)
                                 else Color(0xFF16161F)
                             )
                     )
@@ -790,7 +818,7 @@ private fun LifeDots(birthDate: LocalDate, ageYears: Double) {
                     R.string.weeks_left,
                     totalWeeks - filledWeeks
                 ),
-                fontSize = 9.sp, color = TEXT_MUTED,
+                fontSize = 9.sp, color = ProgressColors.textMuted,
                 letterSpacing = 1.sp, fontFamily = FontFamily.Monospace,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
             )
@@ -822,14 +850,14 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(BG_CARD)
-            .border(1.dp, CARD_BORDER, RoundedCornerShape(24.dp))
+            .background(ProgressColors.bgCard)
+            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Text(
             stringResource(R.string.life_analysis_uzbekistan),
             fontSize = 10.sp,
-            color = TEXT_MUTED,
+            color = ProgressColors.textMuted,
             letterSpacing = 2.sp,
             fontFamily = FontFamily.Monospace
         )
@@ -850,17 +878,17 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF16161F))
+                        .background(ProgressColors.progress)
                         .padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         v.toString(), fontSize = 28.sp,
-                        fontWeight = FontWeight.Black, color = TEXT_PRIMARY,
+                        fontWeight = FontWeight.Black, color = ProgressColors.textPrimary,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        l, fontSize = 9.sp, color = TEXT_MUTED,
+                        l, fontSize = 9.sp, color = ProgressColors.textMuted,
                         letterSpacing = 2.sp, fontFamily = FontFamily.Monospace
                     )
                 }
@@ -881,7 +909,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                     ageYears
                 ),
                 fontSize = 11.sp,
-                color = TEXT_MUTED,
+                color = ProgressColors.textMuted,
                 fontFamily = FontFamily.Monospace
             )
 
@@ -891,7 +919,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                     UZ_LIFE_EXPECTANCY
                 ),
                 fontSize = 11.sp,
-                color = TEXT_MUTED,
+                color = ProgressColors.textMuted,
                 fontFamily = FontFamily.Monospace
             )
         }
@@ -904,7 +932,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 .fillMaxWidth()
                 .height(14.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(Color(0xFF1E1E2E))
+                .background(ProgressColors.progress)
         ) {
             Box(
                 modifier = Modifier
@@ -927,15 +955,17 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 withStyle(
                     SpanStyle(
                         fontSize = 36.sp, fontWeight = FontWeight.Black,
-                        color = COLOR_LIFE, fontFamily = FontFamily.Monospace
+                        color = ProgressColors.colorLife, fontFamily = FontFamily.Monospace
                     )
                 ) {
                     append(String.format(Locale.US, "%.4f", lp * 100))
                 }
                 withStyle(
                     SpanStyle(
-                        fontSize = 20.sp, fontWeight = FontWeight.Medium,
-                        color = COLOR_LIFE.copy(0.7f), fontFamily = FontFamily.Monospace
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = ProgressColors.colorLife.copy(0.7f),
+                        fontFamily = FontFamily.Monospace
                     )
                 ) {
                     append("%")
@@ -947,7 +977,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
         Text(
             stringResource(R.string.life_is_gone),
             fontSize = 12.sp,
-            color = TEXT_MUTED,
+            color = ProgressColors.textMuted,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
@@ -964,8 +994,8 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(COLOR_LIFE.copy(0.06f))
-                .border(1.dp, COLOR_LIFE.copy(0.15f), RoundedCornerShape(16.dp))
+                .background(ProgressColors.colorLife.copy(0.06f))
+                .border(1.dp, ProgressColors.colorLife.copy(0.15f), RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
             Row(
@@ -985,7 +1015,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                             text = String.format(Locale.US, "%,d", v),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Black,
-                            color = COLOR_LIFE,
+                            color = ProgressColors.colorLife,
                             fontFamily = FontFamily.Monospace
                         )
 
@@ -995,7 +1025,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                                 l
                             ),
                             fontSize = 8.sp,
-                            color = TEXT_MUTED,
+                            color = ProgressColors.textMuted,
                             letterSpacing = 1.sp,
                             fontFamily = FontFamily.Monospace
                         )
@@ -1011,12 +1041,12 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF111118))
+                .background(ProgressColors.progress)
                 .border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         listOf(
-                            COLOR_LIFE.copy(0.3f),
+                            ProgressColors.colorLife.copy(0.3f),
                             Color.Transparent
                         )
                     ),
@@ -1027,7 +1057,7 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             Text(
                 stringResource(R.string.quote),
                 fontSize = 12.sp,
-                color = TEXT_MUTED,
+                color = ProgressColors.textMuted,
                 fontStyle = FontStyle.Italic,
                 lineHeight = 18.sp
             )
@@ -1040,8 +1070,8 @@ private fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             onClick = onReset,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TEXT_MUTED),
-            border = BorderStroke(1.dp, CARD_BORDER)
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = ProgressColors.textMuted),
+            border = BorderStroke(1.dp, ProgressColors.cardBorder)
         ) {
             Text(
                 stringResource(R.string.change_date),
@@ -1069,29 +1099,29 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
     val keyboard = LocalSoftwareKeyboardController.current
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = TEXT_PRIMARY,
-        unfocusedTextColor = TEXT_PRIMARY,
-        focusedBorderColor = COLOR_LIFE.copy(0.5f),
-        unfocusedBorderColor = CARD_BORDER,
-        focusedContainerColor = Color(0xFF16161F),
-        unfocusedContainerColor = Color(0xFF16161F),
-        cursorColor = COLOR_LIFE,
-        focusedLabelColor = TEXT_MUTED,
-        unfocusedLabelColor = TEXT_MUTED,
+        focusedTextColor = ProgressColors.textPrimary,
+        unfocusedTextColor = ProgressColors.textPrimary,
+        focusedBorderColor = ProgressColors.colorLife.copy(0.5f),
+        unfocusedBorderColor = ProgressColors.cardBorder,
+        focusedContainerColor = ProgressColors.fieldBackground,
+        unfocusedContainerColor = ProgressColors.fieldBackground,
+        cursorColor = ProgressColors.colorLife,
+        focusedLabelColor = ProgressColors.textMuted,
+        unfocusedLabelColor = ProgressColors.textMuted,
     )
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(BG_CARD)
-            .border(1.dp, CARD_BORDER, RoundedCornerShape(24.dp))
+            .background(ProgressColors.bgCard)
+            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Text(
             stringResource(R.string.life_analysis),
             fontSize = 10.sp,
-            color = TEXT_MUTED,
+            color = ProgressColors.textMuted,
             letterSpacing = 2.sp,
             fontFamily = FontFamily.Monospace
         )
@@ -1102,7 +1132,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
             stringResource(R.string.enter_your_birth_date),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TEXT_PRIMARY
+            color = ProgressColors.textPrimary
         )
         Spacer(Modifier.height(20.dp))
 
@@ -1133,7 +1163,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 },
                 placeholder = {
                     Text(
-                        "01", fontSize = 18.sp, color = TEXT_DIM,
+                        "01", fontSize = 18.sp, color = ProgressColors.textDim,
                         fontFamily = FontFamily.Monospace
                     )
                 },
@@ -1146,11 +1176,11 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Center,
-                    color = TEXT_PRIMARY
+                    color = ProgressColors.textPrimary
                 )
             )
 
-            Text("/", fontSize = 22.sp, color = TEXT_DIM)
+            Text("/", fontSize = 22.sp, color = ProgressColors.textDim)
 
             OutlinedTextField(
                 value = month,
@@ -1174,7 +1204,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 },
                 placeholder = {
                     Text(
-                        "09", fontSize = 18.sp, color = TEXT_DIM,
+                        "09", fontSize = 18.sp, color = ProgressColors.textDim,
                         fontFamily = FontFamily.Monospace
                     )
                 },
@@ -1187,11 +1217,11 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Center,
-                    color = TEXT_PRIMARY
+                    color = ProgressColors.textPrimary
                 )
             )
 
-            Text("/", fontSize = 22.sp, color = TEXT_DIM)
+            Text("/", fontSize = 22.sp, color = ProgressColors.textDim)
 
             OutlinedTextField(
                 value = year,
@@ -1215,7 +1245,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 },
                 placeholder = {
                     Text(
-                        "1995", fontSize = 18.sp, color = TEXT_DIM,
+                        "1995", fontSize = 18.sp, color = ProgressColors.textDim,
                         fontFamily = FontFamily.Monospace
                     )
                 },
@@ -1228,7 +1258,7 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Start,
-                    color = TEXT_PRIMARY
+                    color = ProgressColors.textPrimary
                 )
             )
         }
@@ -1278,15 +1308,18 @@ private fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
                 .height(52.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = COLOR_LIFE,
+                containerColor = ProgressColors.colorLife,
                 contentColor = Color.Black
             )
         ) {
             Text(
                 stringResource(R.string.show_my_life),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
+                style = TextStyle(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.White,
+                ),
                 letterSpacing = 1.sp
             )
         }

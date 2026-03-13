@@ -7,22 +7,44 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.yearprogress.ui.theme.ThemeMode
+import com.example.yearprogress.utils.PreferenceManager
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-class MainViewModel(context: Application) : AndroidViewModel(context) {
+    private val preferenceManager = PreferenceManager(application.applicationContext)
 
-    private val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val themeMode: StateFlow<ThemeMode> = preferenceManager.themeModeFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ThemeMode.CUSTOM_DARK
+        )
 
-    var isFirstLaunch by mutableStateOf(sharedPrefs.getBoolean("is_first_launch", true))
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch { preferenceManager.setThemeMode(mode) }
+    }
+
+    var language by mutableStateOf(preferenceManager.getLanguage())
         private set
 
-    var language by mutableStateOf(sharedPrefs.getString("language", "en") ?: "en")
+    var isFirstLaunch by mutableStateOf(preferenceManager.isFirstLaunch())
         private set
 
-    // Nomini o'zgartiramiz: oldingi clash bo'lmaydi
     fun changeLanguage(lang: String) {
-        sharedPrefs.edit { putString("language", lang) }
-        sharedPrefs.edit { putBoolean("is_first_launch", false) }
+        preferenceManager.setLanguage(lang)
+        preferenceManager.setFirstLaunchDone()
         language = lang
         isFirstLaunch = false
     }
