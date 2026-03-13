@@ -28,13 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.yearprogress.R
-import com.example.yearprogress.ui.theme.BG_CARD
-import com.example.yearprogress.ui.theme.BG_DARK
-import com.example.yearprogress.ui.theme.CARD_BORDER
-import com.example.yearprogress.ui.theme.COLOR_LIFE
-import com.example.yearprogress.ui.theme.TEXT_DIM
-import com.example.yearprogress.ui.theme.TEXT_MUTED
-import com.example.yearprogress.ui.theme.TEXT_PRIMARY
+import com.example.yearprogress.ui.theme.ProgressColors
 
 @Composable
 fun LanguageDialog(
@@ -52,10 +46,9 @@ fun LanguageDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(BG_CARD)
-                .border(1.dp, CARD_BORDER, RoundedCornerShape(20.dp))
+                .background(ProgressColors.bgCard)
+                .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(20.dp))
         ) {
-            // Top glow — same as ProgressTracker background glow
             Box(
                 modifier = Modifier
                     .size(280.dp)
@@ -73,11 +66,10 @@ fun LanguageDialog(
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
-                // Section label — matches TimeCard / BirthDateInput header style
                 Text(
                     text = stringResource(R.string.choose_language),
                     fontSize = 10.sp,
-                    color = TEXT_MUTED,
+                    color = ProgressColors.textMuted,
                     letterSpacing = 2.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -88,7 +80,7 @@ fun LanguageDialog(
                     text = "Language / Язык / Til",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TEXT_PRIMARY
+                    color = ProgressColors.textPrimary
                 )
 
                 Spacer(Modifier.height(20.dp))
@@ -108,21 +100,20 @@ fun LanguageDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Dismiss button — matches OutlinedButton style in the app
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF16161F))
-                        .border(1.dp, CARD_BORDER, RoundedCornerShape(12.dp))
+                        .background(ProgressColors.fieldBackground)
+                        .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(12.dp))
                         .clickable { onDismiss() }
                         .padding(vertical = 13.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "✕  CLOSE",
+                        text = "✕ ${stringResource(R.string.close)}",
                         fontSize = 11.sp,
-                        color = TEXT_DIM,
+                        color = ProgressColors.textPrimary,
                         fontFamily = FontFamily.Monospace,
                         letterSpacing = 2.sp
                     )
@@ -141,25 +132,24 @@ private fun LanguageItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF16161F))
-            .border(1.dp, CARD_BORDER, RoundedCornerShape(12.dp))
+            .background(ProgressColors.fieldBackground)
+            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(12.dp))
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Accent dot — matches PulsingDot / LIVE badge color
             Box(
                 modifier = Modifier
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(COLOR_LIFE.copy(alpha = 0.5f))
+                    .background(ProgressColors.colorLife.copy(alpha = 0.5f))
             )
             Spacer(Modifier.width(12.dp))
             Text(
                 text = name,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = TEXT_PRIMARY,
+                color = ProgressColors.textPrimary,
                 fontFamily = FontFamily.Monospace
             )
         }
