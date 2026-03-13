@@ -45,4 +45,19 @@
     <string name="light">Yorug\'lik</string>
     <string name="dark">Qorong\'u</string>
     <string name="theme">Mavzu</string>
+    <string name="tab_time">Vaqt</string>
+    <string name="tab_life">Hayot</string>
+    <string name="tab_settings">SETTINGS</string>
+    <string name="settings_appearance">APPEARANCE</string>
+    <string name="settings_language">LANGUAGE</string>
+    <string name="settings_about">ABOUT</string>
+    <string name="theme_custom_dark">Custom Dark</string>
+    <string name="theme_custom_dark_desc">Ilovaning o\'z qora dizayni</string>
+    <string name="theme_system_light">System Light</string>
+    <string name="theme_system_light_desc">Tizim kunduzgi ranglari</string>
+    <string name="change_language_desc">Interfeys tilini o\'zgartirish</string>
+    <string name="about_app_name">Ilova</string>
+    <string name="about_data_source">Ma\'lumot manbai</string>
+    <string name="about_data_source_value">World Bank</string>
+    <string name="about_life_expectancy">O\'rtacha umr</string>
 </resources>

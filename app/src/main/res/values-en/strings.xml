@@ -45,5 +45,23 @@
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="theme">Theme</string>
+    <string name="tab_time">Time</string>
+    <string name="tab_life">Life</string>
+    <string name="tab_settings">SETTINGS</string>
+    <string name="settings_appearance">APPEARANCE</string>
+    <string name="settings_language">LANGUAGE</string>
+    <string name="settings_about">ABOUT</string>
 
+    <string name="theme_custom_dark">Custom Dark</string>
+    <string name="theme_custom_dark_desc">App\'s own dark design</string>
+
+    <string name="theme_system_light">System Light</string>
+    <string name="theme_system_light_desc">System daytime colors</string>
+
+    <string name="change_language_desc">Change the interface language</string>
+
+    <string name="about_app_name">App</string>
+    <string name="about_data_source">Data source</string>
+    <string name="about_data_source_value">World Bank</string>
+    <string name="about_life_expectancy">Life expectancy</string>
 </resources>

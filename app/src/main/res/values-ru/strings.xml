@@ -45,4 +45,23 @@
     <string name="light">Свет</string>
     <string name="dark">Темный</string>
     <string name="theme">Тема</string>
+    <string name="tab_time">Время</string>
+    <string name="tab_life">Жизнь</string>
+    <string name="tab_settings">НАСТРОЙКИ</string>
+    <string name="settings_appearance">ВНЕШНИЙ ВИД</string>
+    <string name="settings_language">ЯЗЫК</string>
+    <string name="settings_about">О ПРИЛОЖЕНИИ</string>
+
+    <string name="theme_custom_dark">Тёмная тема</string>
+    <string name="theme_custom_dark_desc">Собственный тёмный дизайн приложения</string>
+
+    <string name="theme_system_light">Светлая системная</string>
+    <string name="theme_system_light_desc">Системные дневные цвета</string>
+
+    <string name="change_language_desc">Изменить язык интерфейса</string>
+
+    <string name="about_app_name">Приложение</string>
+    <string name="about_data_source">Источник данных</string>
+    <string name="about_data_source_value">World Bank</string>
+    <string name="about_life_expectancy">Ожидаемая продолжительность жизни</string>
 </resources>
