@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/year"
-    android:previewImage="@drawable/year_progress"
+    android:previewImage="@drawable/second_year_progress"
     android:minWidth="250dp"
-    android:minHeight="50dp"
+    android:minHeight="100dp"
     android:maxResizeHeight="150dp"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/glance_default_loading_layout"
