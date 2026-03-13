@@ -57,6 +57,14 @@ fun getCurrentDayText(): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
+fun calculateDayProgress2(): Pair<Int, Int> {
+    val now = LocalDate.now()
+    val dayOfYear = now.dayOfYear
+    val totalDays = now.lengthOfYear()
+    return Pair(dayOfYear, totalDays)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentWeekText(): String {
     val dayOfWeek = LocalDateTime.now().dayOfWeek
     return dayOfWeek.name
