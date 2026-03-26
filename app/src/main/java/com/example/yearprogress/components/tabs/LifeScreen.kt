@@ -7,7 +7,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.components.LifeDots
+import com.example.yearprogress.utils.safeClickable
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.DEFAULT_CUSTOM_LIFE_EXPECTANCY
@@ -447,7 +447,7 @@ private fun LifeExpectancySelector(
                             if (selected) ProgressColors.colorLife.copy(0.4f) else ProgressColors.cardBorder,
                             RoundedCornerShape(10.dp)
                         )
-                        .clickable { onSelectPreset(preset) }
+                        .safeClickable { onSelectPreset(preset) }
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(

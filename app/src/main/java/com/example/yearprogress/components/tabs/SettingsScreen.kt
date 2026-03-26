@@ -3,7 +3,6 @@ package com.example.yearprogress.components.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.components.LanguageDialog
+import com.example.yearprogress.utils.safeClickable
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.ui.theme.YearProgressTheme
@@ -95,7 +95,7 @@ fun SettingsScreen(
                         color = if (isSelected) ProgressColors.colorWeek.copy(alpha = 0.4f) else ProgressColors.cardBorder,
                         shape = RoundedCornerShape(16.dp)
                     )
-                    .clickable { onChangeTheme(mode) }
+                    .safeClickable { onChangeTheme(mode) }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -177,7 +177,7 @@ fun SettingsScreen(
                 .clip(RoundedCornerShape(16.dp))
                 .background(ProgressColors.bgCard)
                 .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(16.dp))
-                .clickable { showLanguageDialog = true }
+                .safeClickable { showLanguageDialog = true }
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -253,7 +253,7 @@ fun SettingsScreen(
                                     if (selected) ProgressColors.colorWeek.copy(0.4f) else ProgressColors.cardBorder,
                                     RoundedCornerShape(10.dp)
                                 )
-                                .clickable {
+                                .safeClickable {
                                     weekStartDay = option
                                     preferenceManager.setWeekStartDay(option)
                                 }

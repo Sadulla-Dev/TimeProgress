@@ -2,7 +2,6 @@ package com.example.yearprogress.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.yearprogress.R
 import com.example.yearprogress.ui.theme.ProgressColors
+import com.example.yearprogress.utils.safeClickable
 
 @Composable
 fun LanguageDialog(
@@ -106,7 +106,7 @@ fun LanguageDialog(
                         .clip(RoundedCornerShape(12.dp))
                         .background(ProgressColors.fieldBackground)
                         .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(12.dp))
-                        .clickable { onDismiss() }
+                        .safeClickable { onDismiss() }
                         .padding(vertical = 13.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -134,7 +134,7 @@ private fun LanguageItem(
             .clip(RoundedCornerShape(12.dp))
             .background(ProgressColors.fieldBackground)
             .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(12.dp))
-            .clickable { onClick() }
+            .safeClickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

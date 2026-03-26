@@ -3,7 +3,6 @@ package com.example.yearprogress.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.ui.theme.ProgressColors
+import com.example.yearprogress.utils.safeClickable
 
 @Composable
 fun BottomTabBar(
@@ -75,7 +75,7 @@ fun BottomTabBar(
                         .background(
                             if (isSelected) accent.copy(alpha = 0.10f) else Color.Transparent
                         )
-                        .clickable { onTabSelected(tab) }
+                        .safeClickable { onTabSelected(tab) }
                         .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
