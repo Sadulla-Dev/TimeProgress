@@ -4,11 +4,14 @@ package com.example.yearprogress.components.tabs
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,6 +39,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -54,8 +58,12 @@ import com.example.yearprogress.R
 import com.example.yearprogress.components.LifeDots
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.YearProgressTheme
+import com.example.yearprogress.utils.DEFAULT_CUSTOM_LIFE_EXPECTANCY
+import com.example.yearprogress.utils.LifeExpectancyPreset
+import com.example.yearprogress.utils.PreferenceManager
 import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
 import com.example.yearprogress.utils.ageComponents
+import com.example.yearprogress.utils.lifeExpectancyPresets
 import com.example.yearprogress.utils.lifeProgress
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -65,15 +73,41 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LifeScreen() {
-    var birthDate by remember { mutableStateOf<LocalDate?>(null) }
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context.applicationContext) }
+
+    var birthDate by remember { mutableStateOf<LocalDate?>(preferenceManager.getBirthDate()) }
+    var selectedPresetId by remember { mutableStateOf(preferenceManager.getLifeExpectancyPresetId()) }
+    var customLifeExpectancy by remember {
+        mutableStateOf(String.format(Locale.US, "%.1f", preferenceManager.getCustomLifeExpectancy()))
+    }
+
     Column() {
         if (birthDate != null) {
             LifeSection(
                 birthDate = birthDate!!,
-                onReset = { birthDate = null },
+                selectedPresetId = selectedPresetId,
+                customLifeExpectancy = customLifeExpectancy,
+                onSelectPreset = {
+                    selectedPresetId = it.id
+                    preferenceManager.setLifeExpectancyPresetId(it.id)
+                },
+                onCustomLifeExpectancyChange = { raw ->
+                    customLifeExpectancy = raw
+                    raw.toDoubleOrNull()?.takeIf { it in 1.0..130.0 }?.let {
+                        preferenceManager.setCustomLifeExpectancy(it)
+                    }
+                },
+                onReset = {
+                    preferenceManager.clearBirthDate()
+                    birthDate = null
+                },
             )
         } else {
-            BirthDateInput(onSubmit = { birthDate = it })
+            BirthDateInput(onSubmit = {
+                preferenceManager.setBirthDate(it)
+                birthDate = it
+            })
         }
 
         Spacer(Modifier.height(24.dp))
@@ -83,10 +117,7 @@ fun LifeScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                stringResource(
-                    R.string.uzbekistan_average_life_expectancy,
-                    UZ_LIFE_EXPECTANCY
-                ),
+                stringResource(R.string.based_on_world_bank_data),
                 fontSize = 10.sp,
                 color = ProgressColors.textDim,
                 fontFamily = FontFamily.Monospace,
@@ -94,7 +125,7 @@ fun LifeScreen() {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                stringResource(R.string.based_on_world_bank_data),
+                stringResource(R.string.life_expectancy_hint),
                 fontSize = 9.sp,
                 color = ProgressColors.textDim.copy(0.6f),
                 fontFamily = FontFamily.Monospace,
@@ -104,9 +135,17 @@ fun LifeScreen() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
+fun LifeSection(
+    birthDate: LocalDate,
+    selectedPresetId: String,
+    customLifeExpectancy: String,
+    onSelectPreset: (LifeExpectancyPreset) -> Unit,
+    onCustomLifeExpectancyChange: (String) -> Unit,
+    onReset: () -> Unit
+) {
     var now by remember { mutableStateOf(LocalDate.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -114,11 +153,18 @@ fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
         }
     }
 
-    val lp = lifeProgress(birthDate)
+    val selectedPreset = lifeExpectancyPresets.firstOrNull { it.id == selectedPresetId }
+    val resolvedLifeExpectancy = if (selectedPresetId == "custom") {
+        customLifeExpectancy.toDoubleOrNull()?.takeIf { it in 1.0..130.0 } ?: DEFAULT_CUSTOM_LIFE_EXPECTANCY
+    } else {
+        selectedPreset?.years ?: UZ_LIFE_EXPECTANCY
+    }
+
+    val lp = lifeProgress(birthDate, resolvedLifeExpectancy)
     val animLp = animatedProgressFloat(lp.toFloat())
     val (years, months, days) = ageComponents(birthDate)
     val ageYears = ChronoUnit.DAYS.between(birthDate, now) / 365.25
-    val remaining = UZ_LIFE_EXPECTANCY - ageYears
+    val remaining = (resolvedLifeExpectancy - ageYears).coerceAtLeast(0.0)
     val remYears = remaining.toInt()
     val remWeeks = (remaining * 52.18).toInt()
     val remDays = (remaining * 365.25).toInt()
@@ -132,13 +178,37 @@ fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             .padding(20.dp)
     ) {
         Text(
-            stringResource(R.string.life_analysis_uzbekistan),
+            stringResource(R.string.life_analysis),
             fontSize = 10.sp,
             color = ProgressColors.textMuted,
             letterSpacing = 2.sp,
             fontFamily = FontFamily.Monospace
         )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = if (selectedPresetId == "custom") {
+                stringResource(R.string.life_expectancy_custom_value, resolvedLifeExpectancy)
+            } else {
+                stringResource(
+                    R.string.life_expectancy_preset_value,
+                    stringResource(selectedPreset?.labelRes ?: R.string.life_preset_uzbekistan),
+                    resolvedLifeExpectancy
+                )
+            },
+            fontSize = 12.sp,
+            color = ProgressColors.textDim,
+            fontFamily = FontFamily.Monospace
+        )
         Spacer(Modifier.height(16.dp))
+
+        LifeExpectancySelector(
+            selectedPresetId = selectedPresetId,
+            customLifeExpectancy = customLifeExpectancy,
+            onSelectPreset = onSelectPreset,
+            onCustomLifeExpectancyChange = onCustomLifeExpectancyChange
+        )
+
+        Spacer(Modifier.height(20.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -185,7 +255,7 @@ fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
                 fontFamily = FontFamily.Monospace
             )
             Text(
-                stringResource(R.string.average_life_expectancy, UZ_LIFE_EXPECTANCY),
+                stringResource(R.string.average_life_expectancy, resolvedLifeExpectancy),
                 fontSize = 11.sp,
                 color = ProgressColors.textMuted,
                 fontFamily = FontFamily.Monospace
@@ -251,7 +321,12 @@ fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
 
         Spacer(Modifier.height(20.dp))
 
-        LifeDots(birthDate = birthDate, ageYears = ageYears, colors = ProgressColors)
+        LifeDots(
+            birthDate = birthDate,
+            ageYears = ageYears,
+            lifeExpectancy = resolvedLifeExpectancy,
+            colors = ProgressColors
+        )
 
         Spacer(Modifier.height(20.dp))
 
@@ -337,6 +412,82 @@ fun LifeSection(birthDate: LocalDate, onReset: () -> Unit) {
             )
         }
 
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LifeExpectancySelector(
+    selectedPresetId: String,
+    customLifeExpectancy: String,
+    onSelectPreset: (LifeExpectancyPreset) -> Unit,
+    onCustomLifeExpectancyChange: (String) -> Unit,
+) {
+    Column {
+        Text(
+            stringResource(R.string.life_expectancy_setting),
+            fontSize = 10.sp,
+            color = ProgressColors.textDim,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
+        Spacer(Modifier.height(8.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            lifeExpectancyPresets.forEach { preset ->
+                val selected = preset.id == selectedPresetId
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (selected) ProgressColors.colorLife.copy(0.14f) else ProgressColors.progress)
+                        .border(
+                            1.dp,
+                            if (selected) ProgressColors.colorLife.copy(0.4f) else ProgressColors.cardBorder,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .clickable { onSelectPreset(preset) }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = if (preset.id == "custom") {
+                            stringResource(preset.labelRes)
+                        } else {
+                            "${stringResource(preset.labelRes)} · ${String.format(Locale.US, "%.1f", preset.years)}"
+                        },
+                        fontSize = 10.sp,
+                        color = if (selected) ProgressColors.colorLife else ProgressColors.textMuted,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+        }
+        if (selectedPresetId == "custom") {
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                value = customLifeExpectancy,
+                onValueChange = {
+                    if (it.count { ch -> ch == '.' } <= 1 && it.all { ch -> ch.isDigit() || ch == '.' }) {
+                        onCustomLifeExpectancyChange(it)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(stringResource(R.string.custom_life_expectancy_label))
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = ProgressColors.textPrimary,
+                    unfocusedTextColor = ProgressColors.textPrimary,
+                    focusedBorderColor = ProgressColors.colorLife.copy(0.5f),
+                    unfocusedBorderColor = ProgressColors.cardBorder,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                )
+            )
+        }
     }
 }
 

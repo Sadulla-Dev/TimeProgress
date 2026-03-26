@@ -36,6 +36,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import java.time.LocalDate
 import kotlin.math.ceil
+import com.example.yearprogress.R
 
 class YearDaysWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget
@@ -82,7 +83,7 @@ fun DayGridWidget(context: Context) {
         ) {
             Column {
                 Text(
-                    text = "${now.year} In Days",
+                    text = context.getString(R.string.in_days_title, now.year),
                     style = TextStyle(
                         fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.onSurface
                     ),
@@ -97,7 +98,7 @@ fun DayGridWidget(context: Context) {
                         )
                     )
                     Text(
-                        text = " / $totalDays days",
+                        text = context.getString(R.string.total_days_suffix, totalDays),
                         style = TextStyle(
                             fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.onSurface
                         )
@@ -123,7 +124,7 @@ fun DayGridWidget(context: Context) {
             item {
                 Image(
                     provider = ImageProvider(gridBitmap),
-                    contentDescription = "Day Grid",
+                    contentDescription = context.getString(R.string.day_grid_content_description),
                     modifier = GlanceModifier.fillMaxWidth(),
                     contentScale = ContentScale.FillBounds
                 )

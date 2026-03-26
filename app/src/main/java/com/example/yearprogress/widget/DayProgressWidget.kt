@@ -14,7 +14,11 @@ import androidx.glance.appwidget.provideContent
 import com.example.yearprogress.R
 import com.example.yearprogress.components.ProgressWidgetContent
 import com.example.yearprogress.utils.calculateDayProgress
+import com.example.yearprogress.utils.formatRemainingTime
 import com.example.yearprogress.utils.getCurrentDayText
+import com.example.yearprogress.utils.LanguageManager
+import com.example.yearprogress.utils.remainingSeconds
+import com.example.yearprogress.utils.TimePeriod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,13 +53,21 @@ object DayProgressWidget : GlanceAppWidget() {
     )
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val language = sharedPrefs.getString("language", "en") ?: "en"
+        val localizedContext = LanguageManager.changeLanguage(context, language)
+
         provideContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ProgressWidgetContent(
-                    context = context,
+                    context = localizedContext,
                     progress = calculateDayProgress(),
-                    label = context.getString(R.string.day),
-                    extraInfo = getCurrentDayText()
+                    label = localizedContext.getString(R.string.day),
+                    extraInfo = "${getCurrentDayText()} | " +
+                        formatRemainingTime(
+                            remainingSeconds(TimePeriod.DAY),
+                            TimePeriod.DAY
+                        )
                 )
             }
         }

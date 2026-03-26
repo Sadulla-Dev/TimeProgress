@@ -48,6 +48,7 @@
     <string name="tab_time">Время</string>
     <string name="tab_life">Жизнь</string>
     <string name="tab_settings">НАСТРОЙКИ</string>
+    <string name="remaining">ОСТАЛОСЬ</string>
     <string name="settings_appearance">ВНЕШНИЙ ВИД</string>
     <string name="settings_language">ЯЗЫК</string>
     <string name="settings_about">О ПРИЛОЖЕНИИ</string>
@@ -59,9 +60,36 @@
     <string name="theme_system_light_desc">Системные дневные цвета</string>
 
     <string name="change_language_desc">Изменить язык интерфейса</string>
+    <string name="settings_week">НЕДЕЛЯ</string>
+    <string name="week_start_title">Выберите, с какого дня начинается неделя</string>
+    <string name="week_start_desc">Прогресс недели и обратный отсчёт будут считаться по этой настройке.</string>
+    <string name="week_start_monday">Понедельник</string>
+    <string name="week_start_sunday">Воскресенье</string>
 
     <string name="about_app_name">Приложение</string>
     <string name="about_data_source">Источник данных</string>
     <string name="about_data_source_value">World Bank</string>
     <string name="about_life_expectancy">Ожидаемая продолжительность жизни</string>
+    <string name="in_days_title">%1$d дней в году</string>
+    <string name="day_grid_content_description">Сетка дней года</string>
+    <string name="total_days_suffix"> / %1$d дней</string>
+    <string name="year_win_now">Это ваш НОВЫЙ этап: выберите одну важную цель и доведите до результата (возраст: %1$d).</string>
+    <string name="year_win_past">Вы смогли это в возрасте %1$d. Пора взять ещё одну победу.</string>
+    <string name="life_expectancy_setting">ОЖИДАЕМАЯ ЖИЗНЬ</string>
+    <string name="life_expectancy_hint">ВЫБЕРИТЕ СТРАНУ ИЛИ ВВЕДИТЕ СВОЁ ЗНАЧЕНИЕ</string>
+    <string name="life_expectancy_preset_value">%1$s · %2$.1f лет</string>
+    <string name="life_expectancy_custom_value">Свое значение · %1$.1f лет</string>
+    <string name="custom_life_expectancy_label">Своя продолжительность жизни</string>
+    <string name="life_preset_uzbekistan">Узбекистан</string>
+    <string name="life_preset_usa">США</string>
+    <string name="life_preset_japan">Япония</string>
+    <string name="life_preset_south_korea">Южная Корея</string>
+    <string name="life_preset_custom">Свое значение</string>
+    <string name="achievement_example_title">Пример в возрасте %1$d</string>
+    <string name="achievement_example_nearby">Ближайший пример в этом списке: %1$d лет</string>
+    <string name="share_progress_title">Поделиться прогрессом</string>
+    <string name="share_progress_desc">Поделитесь текущим прогрессом как скриншотом или текстом.</string>
+    <string name="share_image">Поделиться скриншотом</string>
+    <string name="share_text">Поделиться текстом</string>
+    <string name="share_week_start_summary">Начало недели: %1$s</string>
 </resources>

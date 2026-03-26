@@ -1,6 +1,7 @@
 package com.example.yearprogress.widget
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -16,12 +17,12 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -32,13 +33,39 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import com.example.yearprogress.MainActivity
+import com.example.yearprogress.R
+import com.example.yearprogress.utils.LanguageManager
+import com.example.yearprogress.utils.PreferenceManager
 import com.example.yearprogress.utils.calculateDayProgress
 import com.example.yearprogress.utils.calculateMonthProgress
 import com.example.yearprogress.utils.calculateWeekProgress
 import com.example.yearprogress.utils.calculateYearProgress
+import com.example.yearprogress.utils.formatRemainingTimeCompact
+import com.example.yearprogress.utils.remainingSeconds
+import com.example.yearprogress.utils.TimePeriod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AllProgressWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AllProgressWidget
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (
+            intent.action == Intent.ACTION_TIME_TICK ||
+            intent.action == Intent.ACTION_TIME_CHANGED ||
+            intent.action == Intent.ACTION_TIMEZONE_CHANGED
+        ) {
+            val manager = GlanceAppWidgetManager(context)
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
+            coroutineScope.launch {
+                manager.getGlanceIds(AllProgressWidget::class.java).forEach { id ->
+                    AllProgressWidget.update(context, id)
+                }
+            }
+        }
+    }
 }
 
 object AllProgressWidget : GlanceAppWidget() {
@@ -52,14 +79,19 @@ object AllProgressWidget : GlanceAppWidget() {
     )
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val language = sharedPrefs.getString("language", "en") ?: "en"
+        val localizedContext = LanguageManager.changeLanguage(context, language)
+        val weekStartDay = PreferenceManager(context.applicationContext).getWeekStartDay()
+
         provideContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val size = LocalSize.current
 
                 when {
-                    size.width >= 180.dp && size.height < 120.dp -> FourByOneLayout() // 3x1, 4x1
-                    size.height >= 120.dp -> TwoByTwoLayout()                         // 2x2
-                    else -> TwoByTwoLayout()                                           // 2x1
+                    size.width >= 180.dp && size.height < 120.dp -> FourByOneLayout(localizedContext, weekStartDay)
+                    size.height >= 120.dp -> TwoByTwoLayout(localizedContext, weekStartDay)
+                    else -> TwoByTwoLayout(localizedContext, weekStartDay)
                 }
             }
         }
@@ -68,17 +100,45 @@ object AllProgressWidget : GlanceAppWidget() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FourByOneLayout() {
-    val context = LocalContext.current
+fun FourByOneLayout(context: Context, weekStartDay: com.example.yearprogress.utils.WeekStartDay) {
     // Dinamik ranglarni olish
     val colors = GlanceTheme.colors
     val primary = colors.primary.getColor(context).toArgb()
     val outline = colors.outline.getColor(context).toArgb()
 
-    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day", primary, outline)
-    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week", primary, outline)
-    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month", primary, outline)
-    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year", primary, outline)
+    val dayRemaining = remainingSeconds(TimePeriod.DAY)
+    val weekRemaining = remainingSeconds(TimePeriod.WEEK, weekStartDay = weekStartDay)
+    val monthRemaining = remainingSeconds(TimePeriod.MONTH)
+    val yearRemaining = remainingSeconds(TimePeriod.YEAR)
+
+    val day = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateDayProgress(),
+        label = "${context.getString(R.string.day)} ${formatRemainingTimeCompact(dayRemaining, TimePeriod.DAY)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val week = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateWeekProgress(weekStartDay),
+        label = "${context.getString(R.string.week)} ${formatRemainingTimeCompact(weekRemaining, TimePeriod.WEEK)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val month = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateMonthProgress(),
+        label = "${context.getString(R.string.month)} ${formatRemainingTimeCompact(monthRemaining, TimePeriod.MONTH)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val year = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateYearProgress(),
+        label = "${context.getString(R.string.year)} ${formatRemainingTimeCompact(yearRemaining, TimePeriod.YEAR)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
 
     Row(
         modifier = GlanceModifier
@@ -96,16 +156,44 @@ fun FourByOneLayout() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TwoByTwoLayout() {
-    val context = LocalContext.current
+fun TwoByTwoLayout(context: Context, weekStartDay: com.example.yearprogress.utils.WeekStartDay) {
     val colors = GlanceTheme.colors
     val primary = colors.primary.getColor(context).toArgb()
     val outline = colors.outline.getColor(context).toArgb()
 
-    val day = createCircleProgressBitmap(300, calculateDayProgress(), "Day", primary, outline)
-    val week = createCircleProgressBitmap(300, calculateWeekProgress(), "Week", primary, outline)
-    val month = createCircleProgressBitmap(300, calculateMonthProgress(), "Month", primary, outline)
-    val year = createCircleProgressBitmap(300, calculateYearProgress(), "Year", primary, outline)
+    val dayRemaining = remainingSeconds(TimePeriod.DAY)
+    val weekRemaining = remainingSeconds(TimePeriod.WEEK, weekStartDay = weekStartDay)
+    val monthRemaining = remainingSeconds(TimePeriod.MONTH)
+    val yearRemaining = remainingSeconds(TimePeriod.YEAR)
+
+    val day = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateDayProgress(),
+        label = "${context.getString(R.string.day)} ${formatRemainingTimeCompact(dayRemaining, TimePeriod.DAY)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val week = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateWeekProgress(weekStartDay),
+        label = "${context.getString(R.string.week)} ${formatRemainingTimeCompact(weekRemaining, TimePeriod.WEEK)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val month = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateMonthProgress(),
+        label = "${context.getString(R.string.month)} ${formatRemainingTimeCompact(monthRemaining, TimePeriod.MONTH)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
+    val year = createCircleProgressBitmap(
+        size = 300,
+        progress = calculateYearProgress(),
+        label = "${context.getString(R.string.year)} ${formatRemainingTimeCompact(yearRemaining, TimePeriod.YEAR)}",
+        mainColor = primary,
+        secondaryColor = outline
+    )
 
     Column(
         modifier = GlanceModifier

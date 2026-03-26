@@ -4,9 +4,11 @@ package com.example.yearprogress.components.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,15 +39,22 @@ import com.example.yearprogress.components.LanguageDialog
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.ui.theme.YearProgressTheme
+import com.example.yearprogress.utils.PreferenceManager
 import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
+import com.example.yearprogress.utils.WeekStartDay
+import androidx.compose.ui.platform.LocalContext
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     currentMode: ThemeMode,
     onChangeTheme: (ThemeMode) -> Unit,
     onChangeLanguage: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+    val preferenceManager = remember { PreferenceManager(context.applicationContext) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var weekStartDay by remember { mutableStateOf(preferenceManager.getWeekStartDay()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -195,6 +204,71 @@ fun SettingsScreen(
                 color = ProgressColors.textMuted,
                 fontFamily = FontFamily.Monospace
             )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        SettingsSectionLabel(label = stringResource(R.string.settings_week))
+        Spacer(Modifier.height(10.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(ProgressColors.bgCard)
+                .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = stringResource(R.string.week_start_title),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = ProgressColors.textPrimary,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = stringResource(R.string.week_start_desc),
+                    fontSize = 10.sp,
+                    color = ProgressColors.textDim,
+                    fontFamily = FontFamily.Monospace
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(
+                        WeekStartDay.MONDAY to stringResource(R.string.week_start_monday),
+                        WeekStartDay.SUNDAY to stringResource(R.string.week_start_sunday),
+                    ).forEach { (option, label) ->
+                        val selected = option == weekStartDay
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (selected) ProgressColors.colorWeek.copy(0.12f) else ProgressColors.progress
+                                )
+                                .border(
+                                    1.dp,
+                                    if (selected) ProgressColors.colorWeek.copy(0.4f) else ProgressColors.cardBorder,
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable {
+                                    weekStartDay = option
+                                    preferenceManager.setWeekStartDay(option)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 10.sp,
+                                color = if (selected) ProgressColors.colorWeek else ProgressColors.textMuted,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(20.dp))

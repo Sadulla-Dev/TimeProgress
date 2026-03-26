@@ -48,6 +48,7 @@
     <string name="tab_time">Time</string>
     <string name="tab_life">Life</string>
     <string name="tab_settings">SETTINGS</string>
+    <string name="remaining">REMAINING</string>
     <string name="settings_appearance">APPEARANCE</string>
     <string name="settings_language">LANGUAGE</string>
     <string name="settings_about">ABOUT</string>
@@ -59,9 +60,36 @@
     <string name="theme_system_light_desc">System daytime colors</string>
 
     <string name="change_language_desc">Change the interface language</string>
+    <string name="settings_week">WEEK</string>
+    <string name="week_start_title">Choose when your week starts</string>
+    <string name="week_start_desc">Week progress and countdown follow this setting.</string>
+    <string name="week_start_monday">Monday</string>
+    <string name="week_start_sunday">Sunday</string>
 
     <string name="about_app_name">App</string>
     <string name="about_data_source">Data source</string>
     <string name="about_data_source_value">World Bank</string>
     <string name="about_life_expectancy">Life expectancy</string>
+    <string name="in_days_title">%1$d in days</string>
+    <string name="day_grid_content_description">Year day grid</string>
+    <string name="total_days_suffix"> / %1$d days</string>
+    <string name="year_win_now">It is your NOW: pick one meaningful goal and finish it (age: %1$d).</string>
+    <string name="year_win_past">You proved you can do it at age %1$d. Take one more win now!</string>
+    <string name="life_expectancy_setting">LIFE EXPECTANCY</string>
+    <string name="life_expectancy_hint">PICK A COUNTRY AVERAGE OR ENTER YOUR OWN NUMBER</string>
+    <string name="life_expectancy_preset_value">%1$s · %2$.1f years</string>
+    <string name="life_expectancy_custom_value">Custom · %1$.1f years</string>
+    <string name="custom_life_expectancy_label">Custom life expectancy</string>
+    <string name="life_preset_uzbekistan">Uzbekistan</string>
+    <string name="life_preset_usa">USA</string>
+    <string name="life_preset_japan">Japan</string>
+    <string name="life_preset_south_korea">South Korea</string>
+    <string name="life_preset_custom">Custom</string>
+    <string name="achievement_example_title">Example at age %1$d</string>
+    <string name="achievement_example_nearby">Closest example in this list: age %1$d</string>
+    <string name="share_progress_title">Share progress</string>
+    <string name="share_progress_desc">Share your current progress as a screenshot or clean text.</string>
+    <string name="share_image">Share screenshot</string>
+    <string name="share_text">Share text</string>
+    <string name="share_week_start_summary">Week starts on: %1$s</string>
 </resources>
