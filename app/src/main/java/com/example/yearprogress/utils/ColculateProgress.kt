@@ -19,7 +19,7 @@ fun calculateDayProgress(): Double {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun calculateWeekProgress(weekStartDay: WeekStartDay = WeekStartDay.SUNDAY): Double {
+fun calculateWeekProgress(weekStartDay: WeekStartDay = WeekStartDay.MONDAY): Double {
     val now = LocalDateTime.now()
     val (startOfWeek, endOfWeek) = weekBounds(now, weekStartDay)
     val totalSeconds = ChronoUnit.SECONDS.between(startOfWeek, endOfWeek)
@@ -104,7 +104,7 @@ enum class TimePeriod { YEAR, MONTH, WEEK, DAY }
 fun remainingSeconds(
     period: TimePeriod,
     now: LocalDateTime = LocalDateTime.now(),
-    weekStartDay: WeekStartDay = WeekStartDay.SUNDAY
+    weekStartDay: WeekStartDay = WeekStartDay.MONDAY
 ): Long {
     return when (period) {
         TimePeriod.YEAR -> {

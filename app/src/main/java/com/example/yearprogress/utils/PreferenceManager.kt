@@ -37,6 +37,8 @@ class PreferenceManager(private val context: Context) {
         const val LIFE_EXPECTANCY_PRESET = "life_expectancy_preset"
         const val CUSTOM_LIFE_EXPECTANCY = "custom_life_expectancy"
         const val WEEK_START_DAY = "week_start_day"
+        const val GOALS_JSON = "goals_json"
+        const val HABITS_JSON = "habits_json"
     }
 
     fun getBirthDate(): LocalDate? {
@@ -74,13 +76,29 @@ class PreferenceManager(private val context: Context) {
     }
 
     fun getWeekStartDay(): WeekStartDay {
-        val raw = sharedPrefs.getString(LifeKeys.WEEK_START_DAY, WeekStartDay.SUNDAY.name)
-        return runCatching { WeekStartDay.valueOf(raw ?: WeekStartDay.SUNDAY.name) }
-            .getOrDefault(WeekStartDay.SUNDAY)
+        val raw = sharedPrefs.getString(LifeKeys.WEEK_START_DAY, WeekStartDay. MONDAY.name)
+        return runCatching { WeekStartDay.valueOf(raw ?: WeekStartDay.MONDAY.name) }
+            .getOrDefault(WeekStartDay.MONDAY)
     }
 
     fun setWeekStartDay(day: WeekStartDay) {
         sharedPrefs.edit().putString(LifeKeys.WEEK_START_DAY, day.name).apply()
+    }
+
+    fun getGoals(): List<GoalCountdown> {
+        return goalsFromJson(sharedPrefs.getString(LifeKeys.GOALS_JSON, null))
+    }
+
+    fun saveGoals(goals: List<GoalCountdown>) {
+        sharedPrefs.edit().putString(LifeKeys.GOALS_JSON, goalsToJson(goals)).apply()
+    }
+
+    fun getHabits(): List<HabitTracker> {
+        return habitsFromJson(sharedPrefs.getString(LifeKeys.HABITS_JSON, null))
+    }
+
+    fun saveHabits(habits: List<HabitTracker>) {
+        sharedPrefs.edit().putString(LifeKeys.HABITS_JSON, habitsToJson(habits)).apply()
     }
 
     // ── DataStore — faqat ThemeMode uchun ───────────────────────────────────

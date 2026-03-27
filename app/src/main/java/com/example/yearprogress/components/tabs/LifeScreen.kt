@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -328,6 +329,10 @@ fun LifeSection(
             colors = ProgressColors
         )
 
+//        Spacer(Modifier.height(20.dp))
+
+//        ThousandWeeksSection(ageYears = ageYears)
+
         Spacer(Modifier.height(20.dp))
 
         Box(
@@ -414,6 +419,71 @@ fun LifeSection(
 
     }
 }
+
+//@OptIn(ExperimentalLayoutApi::class)
+//@Composable
+//private fun ThousandWeeksSection(ageYears: Double) {
+//    val livedWeeks = (ageYears * 52.18).toInt().coerceAtLeast(0)
+//    val totalWeeks = 1000
+//
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .clip(RoundedCornerShape(18.dp))
+//            .background(ProgressColors.bgDark)
+//            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(18.dp))
+//            .padding(16.dp)
+//    ) {
+//        Column {
+//            Text(
+//                stringResource(R.string.thousand_weeks_title),
+//                fontSize = 10.sp,
+//                color = ProgressColors.textDim,
+//                letterSpacing = 2.sp,
+//                fontFamily = FontFamily.Monospace
+//            )
+//            Spacer(Modifier.height(6.dp))
+//            Text(
+//                stringResource(R.string.thousand_weeks_summary, livedWeeks, totalWeeks),
+//                fontSize = 12.sp,
+//                color = ProgressColors.textPrimary
+//            )
+//            Spacer(Modifier.height(10.dp))
+//            FlowRow(
+//                horizontalArrangement = Arrangement.spacedBy(2.dp),
+//                verticalArrangement = Arrangement.spacedBy(2.dp),
+//                maxItemsInEachRow = 40
+//            ) {
+//                repeat(totalWeeks) { index ->
+//                    Box(
+//                        modifier = Modifier
+//                            .size(width = 6.dp, height = 6.dp)
+//                            .clip(RoundedCornerShape(2.dp))
+//                            .background(
+//                                when {
+//                                    index < livedWeeks -> ProgressColors.colorWeek.copy(0.8f)
+//                                    index == livedWeeks -> ProgressColors.colorLife
+//                                    else -> ProgressColors.progress
+//                                }
+//                            )
+//                            .border(
+//                                width = if (index == livedWeeks) 1.dp else 0.dp,
+//                                color = if (index == livedWeeks) Color.White.copy(0.4f) else Color.Transparent,
+//                                shape = RoundedCornerShape(2.dp)
+//                            )
+//                    )
+//                }
+//            }
+//            Spacer(Modifier.height(8.dp))
+//            Text(
+//                stringResource(R.string.thousand_weeks_caption),
+//                fontSize = 10.sp,
+//                color = ProgressColors.textMuted,
+//                fontFamily = FontFamily.Monospace
+//            )
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

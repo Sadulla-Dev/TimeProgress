@@ -6,7 +6,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -344,22 +348,14 @@ fun LifeDots(birthDate: LocalDate, ageYears: Double, lifeExpectancy: Double, col
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(8.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-                maxItemsInEachRow = 30
-            ) {
-                repeat(totalMonths) { i ->
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 1.dp)
-                            .size(7.dp)
-                            .clip(RoundedCornerShape(1.dp))
-                            .background(if (i < filledMonths) colors.colorMonth.copy(0.75f) else colors.progress)
-                    )
-                }
-            }
+            DotCanvasGrid(
+                totalItems = totalMonths,
+                filledItems = filledMonths,
+                columns = 30,
+                filledColor = colors.colorMonth.copy(0.75f),
+                emptyColor = colors.progress,
+                isCircle = false
+            )
             Spacer(Modifier.height(6.dp))
             Text(
                 stringResource(
@@ -392,25 +388,14 @@ fun LifeDots(birthDate: LocalDate, ageYears: Double, lifeExpectancy: Double, col
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(8.dp))
-            FlowRow(
-                modifier =
-                    Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                maxItemsInEachRow = 52
-            ) {
-                repeat(
-                    totalWeeks
-                ) { i ->
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 1.dp)
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(if (i < filledWeeks) colors.colorWeek.copy(0.7f) else colors.progress)
-                    )
-                }
-            }
+            DotCanvasGrid(
+                totalItems = totalWeeks,
+                filledItems = filledWeeks,
+                columns = 52,
+                filledColor = colors.colorWeek.copy(0.7f),
+                emptyColor = colors.progress,
+                isCircle = true
+            )
             Spacer(Modifier.height(6.dp))
             Text(
                 stringResource(
@@ -424,6 +409,60 @@ fun LifeDots(birthDate: LocalDate, ageYears: Double, lifeExpectancy: Double, col
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
+        }
+    }
+}
+
+@Composable
+private fun DotCanvasGrid(
+    totalItems: Int,
+    filledItems: Int,
+    columns: Int,
+    filledColor: Color,
+    emptyColor: Color,
+    isCircle: Boolean,
+) {
+    val rows = (totalItems + columns - 1) / columns
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val horizontalGap = 2.dp
+        val verticalGap = 2.dp
+        val cellSize = (maxWidth - horizontalGap * (columns - 1)) / columns
+        val canvasHeight = cellSize * rows + verticalGap * (rows - 1)
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(canvasHeight)
+        ) {
+            val cellPx = size.width / columns
+            val dotSizePx = cellPx - horizontalGap.toPx()
+            val radius = dotSizePx / 2f
+
+            repeat(totalItems) { index ->
+                val row = index / columns
+                val col = index % columns
+                val left = col * cellPx
+                val top = row * (dotSizePx + verticalGap.toPx())
+                val color = if (index < filledItems) filledColor else emptyColor
+
+                if (isCircle) {
+                    drawCircle(
+                        color = color,
+                        radius = radius / 1.15f,
+                        center = androidx.compose.ui.geometry.Offset(
+                            x = left + cellPx / 2f,
+                            y = top + dotSizePx / 2f
+                        )
+                    )
+                } else {
+                    drawRoundRect(
+                        color = color,
+                        topLeft = androidx.compose.ui.geometry.Offset(left, top),
+                        size = androidx.compose.ui.geometry.Size(dotSizePx, dotSizePx),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f, 2f)
+                    )
+                }
+            }
         }
     }
 }
