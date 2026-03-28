@@ -3,6 +3,7 @@ package com.example.yearprogress.utils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -20,10 +21,13 @@ data class HabitTracker(
     val createdDate: LocalDate = LocalDate.now()
 )
 
-fun GoalCountdown.progress(today: LocalDate = LocalDate.now()): Double {
-    val totalDays = ChronoUnit.DAYS.between(createdDate, targetDate).coerceAtLeast(1)
-    val elapsed = ChronoUnit.DAYS.between(createdDate, today).coerceIn(0, totalDays)
-    return elapsed.toDouble() / totalDays.toDouble()
+fun GoalCountdown.progress(now: LocalDateTime = LocalDateTime.now()): Double {
+    val start = createdDate.atStartOfDay()
+    val end = targetDate.plusDays(1).atStartOfDay().minusSeconds(1)
+    if (now.isAfter(end) || now.isEqual(end)) return 1.0
+    val totalSeconds = ChronoUnit.SECONDS.between(start, end).coerceAtLeast(1)
+    val elapsedSeconds = ChronoUnit.SECONDS.between(start, now).coerceIn(0, totalSeconds)
+    return elapsedSeconds.toDouble() / totalSeconds.toDouble()
 }
 
 fun GoalCountdown.remainingDays(today: LocalDate = LocalDate.now()): Long {

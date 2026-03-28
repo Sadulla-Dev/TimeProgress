@@ -1,7 +1,5 @@
 package com.example.yearprogress.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -53,13 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.components.tabs.LifeScreen
+import com.example.yearprogress.components.tabs.ProductivityScreen
 import com.example.yearprogress.components.tabs.SettingsScreen
 import com.example.yearprogress.components.tabs.TimeScreen
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.ui.theme.YearProgressTheme
 
-enum class MainTab { TIME, LIFE, SETTINGS ,PRODUCTIVITY}
+enum class MainTab { TIME, LIFE, PRODUCTIVITY, SETTINGS }
 
 @Composable
 fun MainScreenTab(
@@ -160,16 +159,16 @@ fun MainScreenTab(
                                 LifeScreen()
                             }
 
+                            MainTab.PRODUCTIVITY -> {
+                                ProductivityScreen()
+                            }
+
                             MainTab.SETTINGS -> {
                                 SettingsScreen(
                                     currentMode = currentMode,
                                     onChangeTheme = onChangeTheme,
                                     onChangeLanguage = onChangeLanguage,
                                 )
-                            }
-
-                            MainTab.PRODUCTIVITY -> {
-
                             }
                         }
                     }

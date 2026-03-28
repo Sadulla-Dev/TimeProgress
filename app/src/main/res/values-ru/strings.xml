@@ -123,4 +123,8 @@
     <string name="thousand_weeks_title">ВИД НА 1000 НЕДЕЛЬ</string>
     <string name="thousand_weeks_summary">%1$d / %2$d недель</string>
     <string name="thousand_weeks_caption">Каждый квадрат примерно равен одной неделе. Так жизнь становится видимой, а не абстрактной.</string>
+    <string name="time_left_months_days">Осталось %1$d мес., %2$d дн.</string>
+    <string name="time_left_days">Осталось %1$d дн.</string>
+    <string name="time_left_hours_mins">Осталось %1$d ч, %2$d мин</string>
+    <string name="goal_completed">Цель достигнута!</string>
 </resources>

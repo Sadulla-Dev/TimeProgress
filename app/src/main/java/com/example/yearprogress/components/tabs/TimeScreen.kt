@@ -73,8 +73,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.time.format.TextStyle as DateTextStyle
 
-private enum class HabitUnit { MINUTES, HOURS }
-
 private data class CardInfo(
     val period: TimePeriod,
     val title: String,
@@ -92,42 +90,11 @@ fun TimeScreen() {
     val preferenceManager = remember { PreferenceManager(context.applicationContext) }
     val weekStartDay = preferenceManager.getWeekStartDay()
 
-    var goals by remember { mutableStateOf(preferenceManager.getGoals()) }
-    var habits by remember { mutableStateOf(preferenceManager.getHabits()) }
-
     Column {
         LiveTimeCardsSection(
             weekStartDayName = weekStartDay.name,
             locale = locale,
             colors = ProgressColors
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        GoalCountdownSection(
-            goals = goals,
-            onAddGoal = { goal ->
-                goals = (goals + goal).sortedBy { it.targetDate }
-                preferenceManager.saveGoals(goals)
-            },
-            onRemoveGoal = { id ->
-                goals = goals.filterNot { it.id == id }
-                preferenceManager.saveGoals(goals)
-            }
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        HabitTrackerSection(
-            habits = habits,
-            onAddHabit = { habit ->
-                habits = habits + habit
-                preferenceManager.saveHabits(habits)
-            },
-            onRemoveHabit = { id ->
-                habits = habits.filterNot { it.id == id }
-                preferenceManager.saveHabits(habits)
-            }
         )
 
         Spacer(Modifier.height(10.dp))
@@ -235,412 +202,7 @@ private fun LiveTimeCardsSection(
 }
 
 @Composable
-private fun GoalCountdownSection(
-    goals: List<GoalCountdown>,
-    onAddGoal: (GoalCountdown) -> Unit,
-    onRemoveGoal: (String) -> Unit,
-) {
-    var name by remember { mutableStateOf("") }
-    var day by remember { mutableStateOf("") }
-    var month by remember { mutableStateOf("") }
-    var year by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-    val goalNameRequired = stringResource(R.string.goal_name_required)
-    val goalDateRequired = stringResource(R.string.goal_date_required)
-    val goalDateInvalid = stringResource(R.string.goal_date_invalid)
-    val now = rememberDateTimeTicker(1000L)
-    val tomorrow = remember { LocalDate.now().plusDays(1) }
-
-    Column {
-        goals.forEach { goal ->
-            key(goal.id) {
-                GoalCard(goal = goal, now = now, onRemove = { onRemoveGoal(goal.id) })
-                Spacer(Modifier.height(10.dp))
-            }
-        }
-
-        DashboardSection(
-            title = stringResource(R.string.goal_deadlines),
-            subtitle = stringResource(R.string.goal_deadlines_desc)
-        ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.goal_name)) },
-                singleLine = true,
-                colors = dashboardFieldColors()
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SmallNumberField(
-                    day,
-                    { if (it.length <= 2 && it.all(Char::isDigit)) day = it },
-                    stringResource(R.string.day),
-                    Modifier.weight(1f)
-                )
-                SmallNumberField(
-                    month,
-                    { if (it.length <= 2 && it.all(Char::isDigit)) month = it },
-                    stringResource(R.string.month),
-                    Modifier.weight(1f)
-                )
-                SmallNumberField(
-                    year,
-                    { if (it.length <= 4 && it.all(Char::isDigit)) year = it },
-                    stringResource(R.string.year),
-                    Modifier.weight(1.4f)
-                )
-            }
-            error?.let {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    it,
-                    color = Color(0xFFF87171),
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
-                )
-            }
-            Spacer(Modifier.height(10.dp))
-            Button(
-                onClick = {
-                    val d = day.toIntOrNull()
-                    val m = month.toIntOrNull()
-                    val y = year.toIntOrNull()
-                    when {
-                        name.isBlank() -> error = goalNameRequired
-                        d == null || m == null || y == null -> error = goalDateRequired
-                        else -> runCatching {
-                            val target = LocalDate.of(y, m, d)
-                            require(target >= tomorrow)
-                            onAddGoal(
-                                GoalCountdown(
-                                    name = name.trim(),
-                                    createdDate = LocalDate.now(),
-                                    targetDate = target
-                                )
-                            )
-                            name = ""
-                            day = ""
-                            month = ""
-                            year = ""
-                            error = null
-                        }.onFailure {
-                            error = goalDateInvalid
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ProgressColors.colorYear,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text(stringResource(R.string.add_goal))
-            }
-        }
-    }
-}
-
-@Composable
-private fun GoalCard(goal: GoalCountdown, now: LocalDateTime, onRemove: () -> Unit) {
-    val progress = remember(goal, now.toLocalDate()) { goal.progress(now.toLocalDate()) }
-    val endOfTargetDate =
-        remember(goal.targetDate) { goal.targetDate.plusDays(1).atStartOfDay().minusSeconds(1) }
-    val remainingSecondsToGoal = ChronoUnit.SECONDS.between(now, endOfTargetDate).coerceAtLeast(0)
-    val totalSeconds = remember(goal.createdDate, endOfTargetDate) {
-        ChronoUnit.SECONDS.between(goal.createdDate.atStartOfDay(), endOfTargetDate)
-            .coerceAtLeast(1)
-    }
-    val elapsedSeconds = (totalSeconds - remainingSecondsToGoal).coerceAtLeast(0)
-
-    TimeCardFrame(
-        title = stringResource(R.string.goal_deadlines),
-        label = goal.name,
-        progress = progress,
-        totalSeconds = totalSeconds,
-        elapsedSeconds = elapsedSeconds,
-        secondaryLine = "${goal.targetDate} • ${goal.remainingDays()} ${stringResource(R.string.days_left_short)}",
-        accentColor = ProgressColors.colorYear,
-        footer = {
-            Text(
-                text = "${stringResource(R.string.remaining)}: ${
-                    formatRemainingTime(
-                        remainingSecondsToGoal,
-                        TimePeriod.DAY
-                    )
-                }",
-                fontSize = 10.sp,
-                color = ProgressColors.textDim,
-                fontFamily = FontFamily.Monospace
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.goal_progress_summary, (progress * 100).toInt()),
-                color = ProgressColors.textMuted,
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace
-            )
-            Spacer(Modifier.height(10.dp))
-            OutlinedButton(onClick = onRemove) {
-                Text(stringResource(R.string.remove))
-            }
-        }
-    )
-}
-
-@Composable
-private fun HabitTrackerSection(
-    habits: List<HabitTracker>,
-    onAddHabit: (HabitTracker) -> Unit,
-    onRemoveHabit: (String) -> Unit,
-) {
-    var name by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf(HabitUnit.MINUTES) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val habitNameRequired = stringResource(R.string.habit_name_required)
-    val habitMinutesRequired = stringResource(R.string.habit_minutes_required)
-
-    DashboardSection(
-        title = stringResource(R.string.habit_tracker),
-        subtitle = stringResource(R.string.habit_tracker_desc)
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.weight(1f),
-                label = { Text(stringResource(R.string.habit_name)) },
-                singleLine = true,
-                colors = dashboardFieldColors()
-            )
-            OutlinedTextField(
-                value = quantity,
-                onValueChange = { if (it.length <= 3 && it.all(Char::isDigit)) quantity = it },
-                modifier = Modifier.weight(0.7f),
-                label = { Text(stringResource(R.string.habit_amount)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = dashboardFieldColors()
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            HabitUnit.entries.forEach { option ->
-                val selected = option == unit
-                OutlinedButton(
-                    onClick = { unit = option },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = if (selected) ProgressColors.colorLife else ProgressColors.textMuted
-                    )
-                ) {
-                    Text(
-                        when (option) {
-                            HabitUnit.MINUTES -> stringResource(R.string.unit_minutes)
-                            HabitUnit.HOURS -> stringResource(R.string.unit_hours)
-                        }
-                    )
-                }
-            }
-        }
-        error?.let {
-            Spacer(Modifier.height(8.dp))
-            Text(it, color = Color(0xFFF87171), fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-        }
-        Spacer(Modifier.height(10.dp))
-        Button(
-            onClick = {
-                val amount = quantity.toIntOrNull()
-                val minutesPerDay = when (unit) {
-                    HabitUnit.MINUTES -> amount
-                    HabitUnit.HOURS -> amount?.times(60)
-                }
-                when {
-                    name.isBlank() -> error = habitNameRequired
-                    minutesPerDay == null || minutesPerDay <= 0 -> error = habitMinutesRequired
-                    else -> {
-                        onAddHabit(HabitTracker(name = name.trim(), minutesPerDay = minutesPerDay))
-                        name = ""
-                        quantity = ""
-                        unit = HabitUnit.MINUTES
-                        error = null
-                    }
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ProgressColors.colorLife,
-                contentColor = Color.Black
-            )
-        ) {
-            Text(stringResource(R.string.add_habit))
-        }
-
-        if (habits.isNotEmpty()) {
-            Spacer(Modifier.height(14.dp))
-            habits.forEach { habit ->
-                key(habit.id) {
-                    HabitCard(habit = habit, onRemove = { onRemoveHabit(habit.id) })
-                    Spacer(Modifier.height(8.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HabitCard(habit: HabitTracker, onRemove: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(ProgressColors.bgCard)
-            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(20.dp))
-            .padding(horizontal = 20.dp, vertical = 18.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        stringResource(R.string.habit_tracker),
-                        fontSize = 10.sp,
-                        color = ProgressColors.textDim,
-                        letterSpacing = 2.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        habit.name,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = ProgressColors.textPrimary
-                    )
-                    Text(
-                        formatHabitDailyAmount(
-                            habit.minutesPerDay,
-                            stringResource(R.string.per_day)
-                        ),
-                        fontSize = 10.sp,
-                        color = ProgressColors.textDim,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-                OutlinedButton(onClick = onRemove) {
-                    Text(stringResource(R.string.remove))
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                HabitMetric(
-                    formatMinutesOrHours(habit.weeklyMinutes()),
-                    stringResource(R.string.week)
-                )
-                HabitMetric(
-                    formatMinutesOrHours(habit.monthlyMinutes()),
-                    stringResource(R.string.month)
-                )
-                HabitMetric("${habit.yearlyMinutes() / 60}h", stringResource(R.string.year))
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.habit_projection_summary, habit.yearlyMinutes() / 60),
-                color = ProgressColors.textMuted,
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace
-            )
-        }
-    }
-}
-
-@Composable
-private fun HabitMetric(value: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            value,
-            color = ProgressColors.textPrimary,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace
-        )
-        Text(
-            label,
-            color = ProgressColors.textDim,
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace
-        )
-    }
-}
-
-@Composable
-private fun DashboardSection(
-    title: String,
-    subtitle: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(ProgressColors.bgCard)
-            .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(20.dp))
-            .padding(18.dp)
-    ) {
-        Column {
-            Text(
-                title,
-                fontSize = 12.sp,
-                color = ProgressColors.textPrimary,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                subtitle,
-                fontSize = 10.sp,
-                color = ProgressColors.textDim,
-                fontFamily = FontFamily.Monospace
-            )
-            Spacer(Modifier.height(12.dp))
-            content()
-        }
-    }
-}
-
-@Composable
-private fun SmallNumberField(
-    value: String,
-    onChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onChange,
-        modifier = modifier,
-        label = { Text(label) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        colors = dashboardFieldColors()
-    )
-}
-
-@Composable
-private fun dashboardFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = ProgressColors.textPrimary,
-    unfocusedTextColor = ProgressColors.textPrimary,
-    focusedBorderColor = ProgressColors.cardBorder,
-    unfocusedBorderColor = ProgressColors.cardBorder,
-    focusedContainerColor = Color.Transparent,
-    unfocusedContainerColor = Color.Transparent,
-    cursorColor = ProgressColors.textPrimary,
-)
-
-@Composable
-private fun TimeCardFrame(
+internal fun TimeCardFrame(
     title: String,
     label: String,
     progress: Double,
@@ -650,10 +212,12 @@ private fun TimeCardFrame(
     accentColor: Color,
     footer: @Composable ColumnScope.() -> Unit
 ) {
-    val animProg = animatedProgressFloat(progress.toFloat())
-    val pct = progress * 100
+    val clampedProgress = progress.coerceIn(0.0, 1.0)
+    val animProg = animatedProgressFloat(clampedProgress.toFloat())
+    val pct = clampedProgress * 100
     val intPart = pct.toLong().toString()
-    val decPart = format(Locale.US, "%.6f", pct - pct.toLong()).substring(1)
+    val isComplete = pct >= 100.0
+    val decPart = if (isComplete) "" else format(Locale.US, "%.6f", pct - pct.toLong()).substring(1)
 
     Box(
         modifier = Modifier
@@ -748,7 +312,7 @@ private fun TimeCardFrame(
                                 fontFamily = FontFamily.Monospace
                             )
                         ) {
-                            append("$decPart%")
+                            append(if (isComplete) "%" else "$decPart%")
                         }
                     }
                 )
@@ -814,7 +378,7 @@ fun animatedProgressFloat(target: Float): Float {
 }
 
 @Composable
-private fun rememberDateTimeTicker(intervalMillis: Long): LocalDateTime {
+internal fun rememberDateTimeTicker(intervalMillis: Long): LocalDateTime {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(intervalMillis) {
         while (true) {
@@ -823,22 +387,6 @@ private fun rememberDateTimeTicker(intervalMillis: Long): LocalDateTime {
         }
     }
     return now
-}
-
-private fun formatHabitDailyAmount(minutesPerDay: Int, perDayLabel: String): String {
-    return if (minutesPerDay >= 60 && minutesPerDay % 60 == 0) {
-        "${minutesPerDay / 60}h / $perDayLabel"
-    } else {
-        "${minutesPerDay}m / $perDayLabel"
-    }
-}
-
-private fun formatMinutesOrHours(totalMinutes: Int): String {
-    return if (totalMinutes >= 60 && totalMinutes % 60 == 0) {
-        "${totalMinutes / 60}h"
-    } else {
-        "${totalMinutes}m"
-    }
 }
 
 @Preview
