@@ -2,9 +2,9 @@ package com.example.yearprogress.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.time.format.TextStyle
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 

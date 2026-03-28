@@ -3,10 +3,10 @@ package com.example.yearprogress.components.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -35,14 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.components.LanguageDialog
-import com.example.yearprogress.utils.safeClickable
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.PreferenceManager
 import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
 import com.example.yearprogress.utils.WeekStartDay
-import androidx.compose.ui.platform.LocalContext
+import com.example.yearprogress.utils.safeClickable
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -314,7 +314,6 @@ fun SettingsScreen(
         }
     }
 
-    // Language Dialog
     if (showLanguageDialog) {
         LanguageDialog(
             onDismiss = { showLanguageDialog = false },

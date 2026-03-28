@@ -101,41 +101,35 @@ object AllProgressWidget : GlanceAppWidget() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FourByOneLayout(context: Context, weekStartDay: com.example.yearprogress.utils.WeekStartDay) {
-    // Dinamik ranglarni olish
     val colors = GlanceTheme.colors
     val primary = colors.primary.getColor(context).toArgb()
     val outline = colors.outline.getColor(context).toArgb()
 
-    val dayRemaining = remainingSeconds(TimePeriod.DAY)
-    val weekRemaining = remainingSeconds(TimePeriod.WEEK, weekStartDay = weekStartDay)
-    val monthRemaining = remainingSeconds(TimePeriod.MONTH)
-    val yearRemaining = remainingSeconds(TimePeriod.YEAR)
-
     val day = createCircleProgressBitmap(
         size = 300,
         progress = calculateDayProgress(),
-        label = "${context.getString(R.string.day)} ${formatRemainingTimeCompact(dayRemaining, TimePeriod.DAY)}",
+        label = context.getString(R.string.day),
         mainColor = primary,
         secondaryColor = outline
     )
     val week = createCircleProgressBitmap(
         size = 300,
         progress = calculateWeekProgress(weekStartDay),
-        label = "${context.getString(R.string.week)} ${formatRemainingTimeCompact(weekRemaining, TimePeriod.WEEK)}",
+        label = context.getString(R.string.week),
         mainColor = primary,
         secondaryColor = outline
     )
     val month = createCircleProgressBitmap(
         size = 300,
         progress = calculateMonthProgress(),
-        label = "${context.getString(R.string.month)} ${formatRemainingTimeCompact(monthRemaining, TimePeriod.MONTH)}",
+        label = context.getString(R.string.month),
         mainColor = primary,
         secondaryColor = outline
     )
     val year = createCircleProgressBitmap(
         size = 300,
         progress = calculateYearProgress(),
-        label = "${context.getString(R.string.year)} ${formatRemainingTimeCompact(yearRemaining, TimePeriod.YEAR)}",
+        label = context.getString(R.string.year),
         mainColor = primary,
         secondaryColor = outline
     )
@@ -161,36 +155,31 @@ fun TwoByTwoLayout(context: Context, weekStartDay: com.example.yearprogress.util
     val primary = colors.primary.getColor(context).toArgb()
     val outline = colors.outline.getColor(context).toArgb()
 
-    val dayRemaining = remainingSeconds(TimePeriod.DAY)
-    val weekRemaining = remainingSeconds(TimePeriod.WEEK, weekStartDay = weekStartDay)
-    val monthRemaining = remainingSeconds(TimePeriod.MONTH)
-    val yearRemaining = remainingSeconds(TimePeriod.YEAR)
-
     val day = createCircleProgressBitmap(
         size = 300,
         progress = calculateDayProgress(),
-        label = "${context.getString(R.string.day)} ${formatRemainingTimeCompact(dayRemaining, TimePeriod.DAY)}",
+        label = context.getString(R.string.day),
         mainColor = primary,
         secondaryColor = outline
     )
     val week = createCircleProgressBitmap(
         size = 300,
         progress = calculateWeekProgress(weekStartDay),
-        label = "${context.getString(R.string.week)} ${formatRemainingTimeCompact(weekRemaining, TimePeriod.WEEK)}",
+        label = context.getString(R.string.week),
         mainColor = primary,
         secondaryColor = outline
     )
     val month = createCircleProgressBitmap(
         size = 300,
         progress = calculateMonthProgress(),
-        label = "${context.getString(R.string.month)} ${formatRemainingTimeCompact(monthRemaining, TimePeriod.MONTH)}",
+        label = context.getString(R.string.month),
         mainColor = primary,
         secondaryColor = outline
     )
     val year = createCircleProgressBitmap(
         size = 300,
         progress = calculateYearProgress(),
-        label = "${context.getString(R.string.year)} ${formatRemainingTimeCompact(yearRemaining, TimePeriod.YEAR)}",
+        label = context.getString(R.string.year),
         mainColor = primary,
         secondaryColor = outline
     )
@@ -217,8 +206,8 @@ fun createCircleProgressBitmap(
     size: Int,
     progress: Double,
     label: String,
-    mainColor: Int,     // Progress va matn rangi
-    secondaryColor: Int // Orqa fon aylana rangi
+    mainColor: Int,
+    secondaryColor: Int
 ): Bitmap {
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
@@ -229,7 +218,7 @@ fun createCircleProgressBitmap(
         style = Paint.Style.STROKE
         strokeWidth = stroke
         isAntiAlias = true
-        alpha = 70 // Orqa fon aylanasini biroz shaffof qilish
+        alpha = 70
     }
 
     val progressPaint = Paint().apply {

@@ -4,12 +4,12 @@ package com.example.yearprogress.components.tabs
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -27,7 +26,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.yearprogress.R
 import com.example.yearprogress.components.LifeDots
-import com.example.yearprogress.utils.safeClickable
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.DEFAULT_CUSTOM_LIFE_EXPECTANCY
@@ -66,7 +63,7 @@ import com.example.yearprogress.utils.UZ_LIFE_EXPECTANCY
 import com.example.yearprogress.utils.ageComponents
 import com.example.yearprogress.utils.lifeExpectancyPresets
 import com.example.yearprogress.utils.lifeProgress
-import kotlinx.coroutines.delay
+import com.example.yearprogress.utils.safeClickable
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -80,7 +77,13 @@ fun LifeScreen() {
     var birthDate by remember { mutableStateOf<LocalDate?>(preferenceManager.getBirthDate()) }
     var selectedPresetId by remember { mutableStateOf(preferenceManager.getLifeExpectancyPresetId()) }
     var customLifeExpectancy by remember {
-        mutableStateOf(String.format(Locale.US, "%.1f", preferenceManager.getCustomLifeExpectancy()))
+        mutableStateOf(
+            String.format(
+                Locale.US,
+                "%.1f",
+                preferenceManager.getCustomLifeExpectancy()
+            )
+        )
     }
 
     Column() {
@@ -147,16 +150,12 @@ fun LifeSection(
     onCustomLifeExpectancyChange: (String) -> Unit,
     onReset: () -> Unit
 ) {
-    var now by remember { mutableStateOf(LocalDate.now()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(60_000); now = LocalDate.now()
-        }
-    }
+    val now = LocalDate.now()
 
     val selectedPreset = lifeExpectancyPresets.firstOrNull { it.id == selectedPresetId }
     val resolvedLifeExpectancy = if (selectedPresetId == "custom") {
-        customLifeExpectancy.toDoubleOrNull()?.takeIf { it in 1.0..130.0 } ?: DEFAULT_CUSTOM_LIFE_EXPECTANCY
+        customLifeExpectancy.toDoubleOrNull()?.takeIf { it in 1.0..130.0 }
+            ?: DEFAULT_CUSTOM_LIFE_EXPECTANCY
     } else {
         selectedPreset?.years ?: UZ_LIFE_EXPECTANCY
     }
@@ -524,7 +523,13 @@ private fun LifeExpectancySelector(
                         text = if (preset.id == "custom") {
                             stringResource(preset.labelRes)
                         } else {
-                            "${stringResource(preset.labelRes)} · ${String.format(Locale.US, "%.1f", preset.years)}"
+                            "${stringResource(preset.labelRes)} · ${
+                                String.format(
+                                    Locale.US,
+                                    "%.1f",
+                                    preset.years
+                                )
+                            }"
                         },
                         fontSize = 10.sp,
                         color = if (selected) ProgressColors.colorLife else ProgressColors.textMuted,

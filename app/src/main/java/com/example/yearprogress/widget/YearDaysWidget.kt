@@ -140,14 +140,11 @@ fun createYearGridBitmap(
     widthDp: Int
 ): Bitmap {
     val density = context.resources.displayMetrics.density
-    // Vidjetning umumiy kengligi
     val widthPx = (widthDp * density).toInt()
 
-    // Nuqta va masofa o'lchamlari
-    val dotSize = 7 * density // Nuqta diametri
-    val spacing = 3 * density // Nuqtalar orasidagi masofa
+    val dotSize = 7 * density
+    val spacing = 3 * density
 
-    // Bir qatorga nechta nuqta sig'ishini hisoblaymiz
     val dotsPerRow = (widthPx / (dotSize + spacing)).toInt().coerceAtLeast(1)
     val rows = ceil(totalDays.toDouble() / dotsPerRow).toInt()
     val heightPx = (rows * (dotSize + spacing)).toInt()
@@ -156,9 +153,8 @@ fun createYearGridBitmap(
     val canvas = Canvas(bitmap)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // Ranglar
-    val completedColor = 0xFF3F51B5.toInt() // O'tgan kunlar uchun (Ko'k)
-    val remainingColor = 0x44888888.toInt() // Kelgusi kunlar (Ring rangi)
+    val completedColor = 0xFF3F51B5.toInt()
+    val remainingColor = 0x44888888
 
     for (i in 0 until totalDays) {
         val row = i / dotsPerRow
@@ -168,15 +164,13 @@ fun createYearGridBitmap(
         val centerY = row * (dotSize + spacing) + dotSize / 2
 
         if (i < dayOfYear) {
-            // O'tgan kunlar: To'ldirilgan doira
             paint.color = completedColor
             paint.style = Paint.Style.FILL
             canvas.drawCircle(centerX, centerY, dotSize / 2, paint)
         } else {
-            // Kelgusi kunlar: Ring (Aylana) shakli
             paint.color = remainingColor
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = 1.5f * density // Ring chizig'i qalinligi
+            paint.strokeWidth = 1.5f * density
             canvas.drawCircle(centerX, centerY, (dotSize / 2) - (paint.strokeWidth / 2), paint)
         }
     }

@@ -193,17 +193,6 @@ fun findAchievementExample(age: Int): AchievementExample? {
         achievementRu = nearest.achievementRu
     )
 }
-
-fun resolveLifeExpectancy(preferenceManager: PreferenceManager): Double {
-    val presetId = preferenceManager.getLifeExpectancyPresetId()
-    return if (presetId == "custom") {
-        preferenceManager.getCustomLifeExpectancy()
-    } else {
-        lifeExpectancyPresets.firstOrNull { it.id == presetId }?.years
-            ?: DEFAULT_CUSTOM_LIFE_EXPECTANCY
-    }
-}
-
 fun weekBounds(now: LocalDateTime, weekStartDay: WeekStartDay): Pair<LocalDateTime, LocalDateTime> {
     val startOffset = when (weekStartDay) {
         WeekStartDay.MONDAY -> (now.dayOfWeek.value - 1).toLong()
