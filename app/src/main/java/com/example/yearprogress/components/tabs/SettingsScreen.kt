@@ -58,11 +58,9 @@ fun SettingsScreen(
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        // ── THEME section ─────────────────────────────────────────────────
         SettingsSectionLabel(label = stringResource(R.string.settings_appearance))
         Spacer(Modifier.height(10.dp))
 
-        // Theme cards
         val themes = listOf(
             ThemeMode.CUSTOM_DARK to stringResource(R.string.theme_custom_dark),
             ThemeMode.SYSTEM_LIGHT to stringResource(R.string.theme_system_light),
@@ -100,7 +98,6 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Mini theme preview
                 Box(
                     modifier = Modifier
                         .size(52.dp, 38.dp)
@@ -108,7 +105,6 @@ fun SettingsScreen(
                         .background(previewBg)
                         .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(8.dp))
                 ) {
-                    // Mini card
                     Box(
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -116,7 +112,6 @@ fun SettingsScreen(
                             .clip(RoundedCornerShape(4.dp))
                             .background(previewCard)
                     )
-                    // Mini progress bar
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -146,7 +141,6 @@ fun SettingsScreen(
                     )
                 }
 
-                // Selected dot
                 Box(
                     modifier = Modifier
                         .size(10.dp)
@@ -167,7 +161,6 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        // ── LANGUAGE section ──────────────────────────────────────────────
         SettingsSectionLabel(label = stringResource(R.string.settings_language))
         Spacer(Modifier.height(10.dp))
 
@@ -197,7 +190,6 @@ fun SettingsScreen(
                     fontFamily = FontFamily.Monospace
                 )
             }
-            // Arrow
             Text(
                 text = "›",
                 fontSize = 22.sp,
@@ -273,7 +265,6 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        // ── ABOUT section ─────────────────────────────────────────────────
         SettingsSectionLabel(label = stringResource(R.string.settings_about))
         Spacer(Modifier.height(10.dp))
 

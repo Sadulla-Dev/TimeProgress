@@ -8,7 +8,6 @@ import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateDayProgress(): Double {
     val now = LocalDateTime.now()
     val startOfDay = now.withHour(0).withMinute(0).withSecond(0)
@@ -18,7 +17,6 @@ fun calculateDayProgress(): Double {
     return secondsPassed.toDouble() / totalSeconds
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateWeekProgress(weekStartDay: WeekStartDay = WeekStartDay.MONDAY): Double {
     val now = LocalDateTime.now()
     val (startOfWeek, endOfWeek) = weekBounds(now, weekStartDay)
@@ -27,7 +25,6 @@ fun calculateWeekProgress(weekStartDay: WeekStartDay = WeekStartDay.MONDAY): Dou
     return secondsPassed.toDouble() / totalSeconds
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateMonthProgress(): Double {
     val now = LocalDateTime.now()
     val startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
@@ -38,7 +35,6 @@ fun calculateMonthProgress(): Double {
     return secondsPassed.toDouble() / totalSeconds
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateYearProgress(): Double {
     val now = LocalDateTime.now()
     val startOfYear = now.withDayOfYear(1).withHour(0).withMinute(0).withSecond(0)
@@ -48,13 +44,11 @@ fun calculateYearProgress(): Double {
     val secondsPassed = ChronoUnit.SECONDS.between(startOfYear, now)
     return secondsPassed.toDouble() / totalSeconds
 }
-@RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentDayText(): String {
     val day = LocalDateTime.now().dayOfMonth
     return "$day${getDaySuffix(day)}"
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun calculateDayProgress2(): Pair<Int, Int> {
     val now = LocalDate.now()
     val dayOfYear = now.dayOfYear
@@ -62,7 +56,6 @@ fun calculateDayProgress2(): Pair<Int, Int> {
     return Pair(dayOfYear, totalDays)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentWeekText(): String {
     val locale = Locale.getDefault()
     val dayOfWeek = LocalDateTime.now().dayOfWeek
@@ -70,7 +63,6 @@ fun getCurrentWeekText(): String {
         .uppercase(locale)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentMonthText(): String {
     val locale = Locale.getDefault()
     val month = LocalDateTime.now().month
@@ -78,7 +70,6 @@ fun getCurrentMonthText(): String {
         .uppercase(locale)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentYearText(): String {
     return LocalDateTime.now().year.toString() // 2026
 }
@@ -100,7 +91,6 @@ fun getDaySuffix(day: Int): String {
 
 enum class TimePeriod { YEAR, MONTH, WEEK, DAY }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun remainingSeconds(
     period: TimePeriod,
     now: LocalDateTime = LocalDateTime.now(),
@@ -131,7 +121,6 @@ fun remainingSeconds(
     }.coerceAtLeast(0)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun formatRemainingTime(seconds: Long, period: TimePeriod): String {
     val s = seconds.coerceAtLeast(0)
     val days = s / 86_400
@@ -152,7 +141,6 @@ fun formatRemainingTime(seconds: Long, period: TimePeriod): String {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun formatRemainingTimeCompact(seconds: Long, period: TimePeriod): String {
     val s = seconds.coerceAtLeast(0)
     val days = s / 86_400
@@ -176,7 +164,6 @@ fun formatRemainingTimeCompact(seconds: Long, period: TimePeriod): String {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun yearProgress(now: LocalDateTime): Double {
     val start = LocalDateTime.of(now.year, 1, 1, 0, 0)
     val end   = LocalDateTime.of(now.year, 12, 31, 23, 59, 59)
@@ -184,7 +171,6 @@ fun yearProgress(now: LocalDateTime): Double {
             ChronoUnit.SECONDS.between(start, end).toDouble()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun monthProgress(now: LocalDateTime): Double {
     val start = LocalDateTime.of(now.year, now.month, 1, 0, 0)
     val end   = start.plusMonths(1).minusSeconds(1)
@@ -192,7 +178,6 @@ fun monthProgress(now: LocalDateTime): Double {
             ChronoUnit.SECONDS.between(start, end).toDouble()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun weekProgress(
     now: LocalDateTime,
     weekStartDay: WeekStartDay = WeekStartDay.SUNDAY
@@ -202,7 +187,6 @@ fun weekProgress(
             ChronoUnit.SECONDS.between(start, end).toDouble()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun dayProgress(now: LocalDateTime): Double {
     val start = now.toLocalDate().atStartOfDay()
     val end   = start.plusDays(1).minusSeconds(1)
@@ -210,7 +194,6 @@ fun dayProgress(now: LocalDateTime): Double {
             ChronoUnit.SECONDS.between(start, end).toDouble()
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun ageComponents(birthDate: LocalDate): Triple<Int, Int, Int> {
     val now = LocalDate.now()
     var years  = now.year - birthDate.year

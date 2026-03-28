@@ -49,7 +49,6 @@ object YearDaysWidget : GlanceAppWidget() {
         setOf(DpSize(250.dp, 120.dp))
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             GlanceTheme {

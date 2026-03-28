@@ -6,8 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
@@ -21,8 +19,8 @@ import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -40,9 +38,6 @@ import com.example.yearprogress.utils.calculateDayProgress
 import com.example.yearprogress.utils.calculateMonthProgress
 import com.example.yearprogress.utils.calculateWeekProgress
 import com.example.yearprogress.utils.calculateYearProgress
-import com.example.yearprogress.utils.formatRemainingTimeCompact
-import com.example.yearprogress.utils.remainingSeconds
-import com.example.yearprogress.utils.TimePeriod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -85,20 +80,21 @@ object AllProgressWidget : GlanceAppWidget() {
         val weekStartDay = PreferenceManager(context.applicationContext).getWeekStartDay()
 
         provideContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val size = LocalSize.current
+            val size = LocalSize.current
 
-                when {
-                    size.width >= 180.dp && size.height < 120.dp -> FourByOneLayout(localizedContext, weekStartDay)
-                    size.height >= 120.dp -> TwoByTwoLayout(localizedContext, weekStartDay)
-                    else -> TwoByTwoLayout(localizedContext, weekStartDay)
-                }
+            when {
+                size.width >= 180.dp && size.height < 120.dp -> FourByOneLayout(
+                    localizedContext,
+                    weekStartDay
+                )
+
+                size.height >= 120.dp -> TwoByTwoLayout(localizedContext, weekStartDay)
+                else -> TwoByTwoLayout(localizedContext, weekStartDay)
             }
         }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FourByOneLayout(context: Context, weekStartDay: com.example.yearprogress.utils.WeekStartDay) {
     val colors = GlanceTheme.colors
@@ -148,7 +144,6 @@ fun FourByOneLayout(context: Context, weekStartDay: com.example.yearprogress.uti
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TwoByTwoLayout(context: Context, weekStartDay: com.example.yearprogress.utils.WeekStartDay) {
     val colors = GlanceTheme.colors

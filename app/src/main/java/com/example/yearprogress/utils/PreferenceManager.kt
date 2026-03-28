@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
+
 class PreferenceManager(private val context: Context) {
 
     private val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -75,7 +76,7 @@ class PreferenceManager(private val context: Context) {
     }
 
     fun getWeekStartDay(): WeekStartDay {
-        val raw = sharedPrefs.getString(LifeKeys.WEEK_START_DAY, WeekStartDay. MONDAY.name)
+        val raw = sharedPrefs.getString(LifeKeys.WEEK_START_DAY, WeekStartDay.MONDAY.name)
         return runCatching { WeekStartDay.valueOf(raw ?: WeekStartDay.MONDAY.name) }
             .getOrDefault(WeekStartDay.MONDAY)
     }
@@ -108,7 +109,11 @@ class PreferenceManager(private val context: Context) {
     val themeModeFlow: Flow<ThemeMode> = context.dataStore.data
         .map { prefs ->
             val modeName = prefs[Keys.THEME_MODE] ?: ThemeMode.CUSTOM_DARK.name
-            try { ThemeMode.valueOf(modeName) } catch (e: Exception) { ThemeMode.CUSTOM_DARK }
+            try {
+                ThemeMode.valueOf(modeName)
+            } catch (e: Exception) {
+                ThemeMode.CUSTOM_DARK
+            }
         }
 
     suspend fun setThemeMode(mode: ThemeMode) {

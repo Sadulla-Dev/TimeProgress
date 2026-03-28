@@ -1,8 +1,6 @@
 package com.example.yearprogress.components.tabs
 
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -68,7 +66,6 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LifeScreen() {
     val context = LocalContext.current
@@ -140,7 +137,6 @@ fun LifeScreen() {
 }
 
 @OptIn(ExperimentalLayoutApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LifeSection(
     birthDate: LocalDate,
@@ -566,7 +562,6 @@ private fun LifeExpectancySelector(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
     var day by remember { mutableStateOf("") }
@@ -783,7 +778,6 @@ fun BirthDateInput(onSubmit: (LocalDate) -> Unit) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 private fun LifeScreenPreview() = YearProgressTheme {

@@ -59,9 +59,8 @@ import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.ThemeMode
 import com.example.yearprogress.ui.theme.YearProgressTheme
 
-enum class MainTab { TIME, LIFE, SETTINGS }
+enum class MainTab { TIME, LIFE, SETTINGS ,PRODUCTIVITY}
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreenTab(
     currentMode: ThemeMode,
@@ -168,6 +167,10 @@ fun MainScreenTab(
                                     onChangeLanguage = onChangeLanguage,
                                 )
                             }
+
+                            MainTab.PRODUCTIVITY -> {
+
+                            }
                         }
                     }
                 }
@@ -222,7 +225,6 @@ fun LiveChip() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 private fun TabScreenPreview() = YearProgressTheme {

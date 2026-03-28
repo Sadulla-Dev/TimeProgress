@@ -2,8 +2,6 @@
 
 package com.example.yearprogress.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,7 +45,6 @@ import java.time.temporal.ChronoUnit
 
 enum class DotMode { YEAR, MONTH, WEEK }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LifeDots(birthDate: LocalDate, ageYears: Double, lifeExpectancy: Double, colors: AppColors) {
     val language = LocalContext.current.resources.configuration.locales.get(0)?.language ?: "en"

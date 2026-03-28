@@ -1,7 +1,5 @@
 package com.example.yearprogress.components.tabs
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -87,7 +85,6 @@ private data class CardInfo(
     val accentColor: Color,
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimeScreen() {
     val context = LocalContext.current
@@ -137,7 +134,6 @@ fun TimeScreen() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun LiveTimeCardsSection(
     weekStartDayName: String,
@@ -238,7 +234,6 @@ private fun LiveTimeCardsSection(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun GoalCountdownSection(
     goals: List<GoalCountdown>,
@@ -346,7 +341,6 @@ private fun GoalCountdownSection(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun GoalCard(goal: GoalCountdown, now: LocalDateTime, onRemove: () -> Unit) {
     val progress = remember(goal, now.toLocalDate()) { goal.progress(now.toLocalDate()) }
@@ -819,7 +813,6 @@ fun animatedProgressFloat(target: Float): Float {
     return animated.value
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun rememberDateTimeTicker(intervalMillis: Long): LocalDateTime {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
@@ -848,7 +841,6 @@ private fun formatMinutesOrHours(totalMinutes: Int): String {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 private fun TimeScreenPreview() = YearProgressTheme {

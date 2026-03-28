@@ -46,6 +46,7 @@
     <string name="dark">Qorong\'u</string>
     <string name="theme">Mavzu</string>
     <string name="tab_time">Vaqt</string>
+    <string name="tab_productivity">Tracker</string>
     <string name="tab_life">Hayot</string>
     <string name="tab_settings">SETTINGS</string>
     <string name="remaining">QOLDI</string>
@@ -90,6 +91,8 @@
     <string name="share_week_start_summary">Hafta boshi: %1$s</string>
     <string name="goal_deadlines">MAQSAD COUNTDOWN</string>
     <string name="goal_deadlines_desc">Muhim sanalar uchun alohida countdown va progress yarating.</string>
+    <string name="productivity_goals_tab">Maqsadlar</string>
+    <string name="productivity_habits_tab">Odatlar</string>
     <string name="goal_name">Maqsad nomi</string>
     <string name="goal_name_required">Maqsad nomini kiriting</string>
     <string name="goal_date_required">Sana maydonlarini to\'ldiring</string>
@@ -101,11 +104,13 @@
     <string name="habit_tracker">ODAT TRACKER</string>
     <string name="habit_tracker_desc">Har kungi vaqt investitsiyasini kuzating.</string>
     <string name="habit_name">Odat nomi</string>
+    <string name="habit_name_placeholder">Kitob o\'qish</string>
     <string name="habit_name_required">Odat nomini kiriting</string>
     <string name="habit_minutes_required">Kunlik daqiqani kiriting</string>
     <string name="minutes_day_short">min/kun</string>
     <string name="minutes_day">daqiqa / kun</string>
     <string name="habit_amount">Miqdor</string>
+    <string name="habit_amount_placeholder">30</string>
     <string name="unit_minutes">Minut</string>
     <string name="unit_hours">Soat</string>
     <string name="per_day">kuniga</string>

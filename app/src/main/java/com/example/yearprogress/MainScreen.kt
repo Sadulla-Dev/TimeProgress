@@ -18,7 +18,6 @@ import com.example.yearprogress.components.LanguageDialog
 import com.example.yearprogress.components.MainScreenTab
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(viewModel: MainViewModel = viewModel()) {
 

@@ -46,6 +46,7 @@
     <string name="dark">Dark</string>
     <string name="theme">Theme</string>
     <string name="tab_time">Time</string>
+    <string name="tab_productivity">Tracker</string>
     <string name="tab_life">Life</string>
     <string name="tab_settings">SETTINGS</string>
     <string name="remaining">REMAINING</string>
@@ -94,6 +95,8 @@
     <string name="share_week_start_summary">Week starts on: %1$s</string>
     <string name="goal_deadlines">GOAL DEADLINES</string>
     <string name="goal_deadlines_desc">Create countdowns and progress for your important dates.</string>
+    <string name="productivity_goals_tab">Goals</string>
+    <string name="productivity_habits_tab">Habits</string>
     <string name="goal_name">Goal name</string>
     <string name="goal_name_required">Enter a goal name</string>
     <string name="goal_date_required">Fill in the date fields</string>
@@ -105,11 +108,13 @@
     <string name="habit_tracker">HABIT TRACKER</string>
     <string name="habit_tracker_desc">Track daily time investment into habits that matter.</string>
     <string name="habit_name">Habit name</string>
+    <string name="habit_name_placeholder">Reading</string>
     <string name="habit_name_required">Enter a habit name</string>
     <string name="habit_minutes_required">Enter daily minutes</string>
     <string name="minutes_day_short">min/day</string>
     <string name="minutes_day">minutes / day</string>
     <string name="habit_amount">Amount</string>
+    <string name="habit_amount_placeholder">30</string>
     <string name="unit_minutes">Minutes</string>
     <string name="unit_hours">Hours</string>
     <string name="per_day">per day</string>

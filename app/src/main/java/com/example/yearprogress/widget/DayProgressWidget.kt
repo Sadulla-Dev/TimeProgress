@@ -58,7 +58,6 @@ object DayProgressWidget : GlanceAppWidget() {
         val localizedContext = LanguageManager.changeLanguage(context, language)
 
         provideContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ProgressWidgetContent(
                     context = localizedContext,
                     progress = calculateDayProgress(),
@@ -69,7 +68,6 @@ object DayProgressWidget : GlanceAppWidget() {
                             TimePeriod.DAY
                         )
                 )
-            }
         }
     }
 }

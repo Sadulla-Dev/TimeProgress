@@ -60,7 +60,6 @@ object WeekProgressWidget : GlanceAppWidget() {
         val weekStartDay = PreferenceManager(context.applicationContext).getWeekStartDay()
 
         provideContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ProgressWidgetContent(
                     context = localizedContext,
                     progress = calculateWeekProgress(weekStartDay),
@@ -71,7 +70,6 @@ object WeekProgressWidget : GlanceAppWidget() {
                             TimePeriod.WEEK
                         )
                 )
-            }
         }
     }
 }

@@ -46,6 +46,7 @@
     <string name="dark">Темный</string>
     <string name="theme">Тема</string>
     <string name="tab_time">Время</string>
+    <string name="tab_productivity">Трекер</string>
     <string name="tab_life">Жизнь</string>
     <string name="tab_settings">НАСТРОЙКИ</string>
     <string name="remaining">ОСТАЛОСЬ</string>
@@ -94,6 +95,8 @@
     <string name="share_week_start_summary">Начало недели: %1$s</string>
     <string name="goal_deadlines">ДЕДЛАЙНЫ ЦЕЛЕЙ</string>
     <string name="goal_deadlines_desc">Создавайте отдельные отсчёты и прогресс для важных дат.</string>
+    <string name="productivity_goals_tab">Цели</string>
+    <string name="productivity_habits_tab">Привычки</string>
     <string name="goal_name">Название цели</string>
     <string name="goal_name_required">Введите название цели</string>
     <string name="goal_date_required">Заполните поля даты</string>
@@ -105,11 +108,13 @@
     <string name="habit_tracker">ТРЕКЕР ПРИВЫЧЕК</string>
     <string name="habit_tracker_desc">Отслеживайте ежедневные вложения времени в важные привычки.</string>
     <string name="habit_name">Название привычки</string>
+    <string name="habit_name_placeholder">Чтение</string>
     <string name="habit_name_required">Введите название привычки</string>
     <string name="habit_minutes_required">Введите минуты в день</string>
     <string name="minutes_day_short">мин/день</string>
     <string name="minutes_day">минут / день</string>
     <string name="habit_amount">Количество</string>
+    <string name="habit_amount_placeholder">30</string>
     <string name="unit_minutes">Минуты</string>
     <string name="unit_hours">Часы</string>
     <string name="per_day">в день</string>

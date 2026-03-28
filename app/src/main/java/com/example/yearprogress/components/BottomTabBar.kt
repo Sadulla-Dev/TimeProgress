@@ -37,6 +37,7 @@ fun BottomTabBar(
 ) {
     val tabAccent = mapOf(
         MainTab.TIME to ProgressColors.colorYear,
+        MainTab.PRODUCTIVITY to ProgressColors.colorMonth,
         MainTab.LIFE to ProgressColors.colorLife,
         MainTab.SETTINGS to ProgressColors.colorWeek,
     )
@@ -64,6 +65,7 @@ fun BottomTabBar(
 
                 val label = when (tab) {
                     MainTab.TIME -> stringResource(R.string.tab_time)
+                    MainTab.PRODUCTIVITY -> stringResource(R.string.tab_productivity)
                     MainTab.LIFE -> stringResource(R.string.tab_life)
                     MainTab.SETTINGS -> stringResource(R.string.tab_settings)
                 }
