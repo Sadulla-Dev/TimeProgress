@@ -16,17 +16,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,35 +36,35 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.yearprogress.notifications.ReminderScheduler
 import com.example.yearprogress.R
 import com.example.yearprogress.ui.theme.AppColors
 import com.example.yearprogress.ui.theme.ProgressColors
 import com.example.yearprogress.ui.theme.YearProgressTheme
 import com.example.yearprogress.utils.GoalCountdown
-import com.example.yearprogress.utils.HabitTracker
 import com.example.yearprogress.utils.PreferenceManager
 import com.example.yearprogress.utils.TimePeriod
 import com.example.yearprogress.utils.dayProgress
+import com.example.yearprogress.utils.elapsedSeconds
 import com.example.yearprogress.utils.formatRemainingTime
 import com.example.yearprogress.utils.getDaySuffix
 import com.example.yearprogress.utils.monthProgress
-import com.example.yearprogress.utils.monthlyMinutes
 import com.example.yearprogress.utils.progress
-import com.example.yearprogress.utils.remainingDays
+import com.example.yearprogress.utils.remainingLabel
+import com.example.yearprogress.utils.resolvePinnedGoal
+import com.example.yearprogress.utils.totalSeconds
 import com.example.yearprogress.utils.weekBounds
 import com.example.yearprogress.utils.weekProgress
-import com.example.yearprogress.utils.weeklyMinutes
 import com.example.yearprogress.utils.yearProgress
-import com.example.yearprogress.utils.yearlyMinutes
+import com.example.yearprogress.widget.WidgetRefreshManager
 import kotlinx.coroutines.delay
 import java.lang.String.format
-import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.time.format.TextStyle as DateTextStyle
@@ -84,13 +80,36 @@ private data class CardInfo(
 )
 
 @Composable
-fun TimeScreen() {
+fun TimeScreen(onOpenProductivity: () -> Unit = {}) {
     val context = LocalContext.current
     val locale = context.resources.configuration.locales.get(0) ?: Locale.getDefault()
     val preferenceManager = remember { PreferenceManager(context.applicationContext) }
+    var goals by remember { mutableStateOf(preferenceManager.getGoals()) }
+    var pinnedGoalId by remember { mutableStateOf(preferenceManager.getPinnedGoalId()) }
     val weekStartDay = preferenceManager.getWeekStartDay()
+    val pinnedGoal = remember(goals, pinnedGoalId) {
+        resolvePinnedGoal(goals, pinnedGoalId)
+    }
+
+    LaunchedEffect(goals, pinnedGoalId) {
+        val resolvedGoal = resolvePinnedGoal(goals, pinnedGoalId) ?: return@LaunchedEffect
+        if (resolvedGoal.id != pinnedGoalId) {
+            preferenceManager.setPinnedGoalId(resolvedGoal.id)
+            pinnedGoalId = resolvedGoal.id
+            WidgetRefreshManager.refreshGoalWidgets(context)
+            ReminderScheduler.rescheduleAll(context)
+        }
+    }
 
     Column {
+        MainGoalSection(
+            goal = pinnedGoal,
+            locale = locale,
+            onOpenProductivity = onOpenProductivity
+        )
+
+        Spacer(Modifier.height(10.dp))
+
         LiveTimeCardsSection(
             weekStartDayName = weekStartDay.name,
             locale = locale,
@@ -99,6 +118,88 @@ fun TimeScreen() {
 
         Spacer(Modifier.height(10.dp))
     }
+}
+
+@Composable
+private fun MainGoalSection(
+    goal: GoalCountdown?,
+    locale: Locale,
+    onOpenProductivity: () -> Unit
+) {
+    val context = LocalContext.current
+    if (goal == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(ProgressColors.bgCard)
+                .border(1.dp, ProgressColors.cardBorder, RoundedCornerShape(20.dp))
+                .padding(20.dp)
+        ) {
+            Column {
+                Text(
+                    stringResource(R.string.main_goal),
+                    fontSize = 10.sp,
+                    color = ProgressColors.textDim,
+                    letterSpacing = 2.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.main_goal_empty_title),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ProgressColors.textPrimary
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    stringResource(R.string.main_goal_empty_body),
+                    fontSize = 12.sp,
+                    color = ProgressColors.textMuted,
+                    lineHeight = 18.sp
+                )
+                Spacer(Modifier.height(14.dp))
+                Button(
+                    onClick = onOpenProductivity,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ProgressColors.colorYear,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text(stringResource(R.string.open_tracker))
+                }
+            }
+        }
+        return
+    }
+
+    val now = rememberDateTimeTicker(1000L)
+    val dateFormatter = remember(locale) { DateTimeFormatter.ofPattern("dd MMM yyyy", locale) }
+
+    TimeCardFrame(
+        title = stringResource(R.string.main_goal),
+        label = goal.name,
+        progress = goal.progress(now),
+        totalSeconds = goal.totalSeconds(),
+        elapsedSeconds = goal.elapsedSeconds(now),
+        secondaryLine = "${goal.targetDate.format(dateFormatter)} • ${goal.remainingLabel(context, now)}",
+        accentColor = ProgressColors.colorYear,
+        footer = {
+            Text(
+                text = stringResource(R.string.main_goal_hint),
+                fontSize = 10.sp,
+                color = ProgressColors.textDim,
+                fontFamily = FontFamily.Monospace
+            )
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = onOpenProductivity,
+                border = androidx.compose.foundation.BorderStroke(1.dp, ProgressColors.cardBorder)
+            ) {
+                Text(stringResource(R.string.open_tracker))
+            }
+        }
+    )
 }
 
 @Composable

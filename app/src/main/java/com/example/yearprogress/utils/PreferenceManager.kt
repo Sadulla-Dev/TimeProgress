@@ -39,6 +39,19 @@ class PreferenceManager(private val context: Context) {
         const val WEEK_START_DAY = "week_start_day"
         const val GOALS_JSON = "goals_json"
         const val HABITS_JSON = "habits_json"
+        const val PINNED_GOAL_ID = "pinned_goal_id"
+    }
+
+    private object ReminderKeys {
+        const val DAILY_REMINDER_ENABLED = "daily_reminder_enabled"
+        const val DAILY_REMINDER_HOUR = "daily_reminder_hour"
+        const val DAILY_REMINDER_MINUTE = "daily_reminder_minute"
+        const val WEEKLY_REMINDER_ENABLED = "weekly_reminder_enabled"
+        const val WEEKLY_REMINDER_HOUR = "weekly_reminder_hour"
+        const val WEEKLY_REMINDER_MINUTE = "weekly_reminder_minute"
+        const val GOAL_REMINDER_ENABLED = "goal_reminder_enabled"
+        const val GOAL_REMINDER_HOUR = "goal_reminder_hour"
+        const val GOAL_REMINDER_MINUTE = "goal_reminder_minute"
     }
 
     fun getBirthDate(): LocalDate? {
@@ -93,12 +106,79 @@ class PreferenceManager(private val context: Context) {
         sharedPrefs.edit().putString(LifeKeys.GOALS_JSON, goalsToJson(goals)).apply()
     }
 
+    fun getPinnedGoalId(): String? = sharedPrefs.getString(LifeKeys.PINNED_GOAL_ID, null)
+
+    fun setPinnedGoalId(id: String) {
+        sharedPrefs.edit().putString(LifeKeys.PINNED_GOAL_ID, id).apply()
+    }
+
+    fun clearPinnedGoalId() {
+        sharedPrefs.edit().remove(LifeKeys.PINNED_GOAL_ID).apply()
+    }
+
     fun getHabits(): List<HabitTracker> {
         return habitsFromJson(sharedPrefs.getString(LifeKeys.HABITS_JSON, null))
     }
 
     fun saveHabits(habits: List<HabitTracker>) {
         sharedPrefs.edit().putString(LifeKeys.HABITS_JSON, habitsToJson(habits)).apply()
+    }
+
+    fun isDailyReminderEnabled(): Boolean {
+        return sharedPrefs.getBoolean(ReminderKeys.DAILY_REMINDER_ENABLED, false)
+    }
+
+    fun setDailyReminderEnabled(enabled: Boolean) {
+        sharedPrefs.edit().putBoolean(ReminderKeys.DAILY_REMINDER_ENABLED, enabled).apply()
+    }
+
+    fun getDailyReminderHour(): Int = sharedPrefs.getInt(ReminderKeys.DAILY_REMINDER_HOUR, 20)
+
+    fun getDailyReminderMinute(): Int = sharedPrefs.getInt(ReminderKeys.DAILY_REMINDER_MINUTE, 0)
+
+    fun setDailyReminderTime(hour: Int, minute: Int) {
+        sharedPrefs.edit()
+            .putInt(ReminderKeys.DAILY_REMINDER_HOUR, hour)
+            .putInt(ReminderKeys.DAILY_REMINDER_MINUTE, minute)
+            .apply()
+    }
+
+    fun isWeeklyReminderEnabled(): Boolean {
+        return sharedPrefs.getBoolean(ReminderKeys.WEEKLY_REMINDER_ENABLED, false)
+    }
+
+    fun setWeeklyReminderEnabled(enabled: Boolean) {
+        sharedPrefs.edit().putBoolean(ReminderKeys.WEEKLY_REMINDER_ENABLED, enabled).apply()
+    }
+
+    fun getWeeklyReminderHour(): Int = sharedPrefs.getInt(ReminderKeys.WEEKLY_REMINDER_HOUR, 20)
+
+    fun getWeeklyReminderMinute(): Int = sharedPrefs.getInt(ReminderKeys.WEEKLY_REMINDER_MINUTE, 0)
+
+    fun setWeeklyReminderTime(hour: Int, minute: Int) {
+        sharedPrefs.edit()
+            .putInt(ReminderKeys.WEEKLY_REMINDER_HOUR, hour)
+            .putInt(ReminderKeys.WEEKLY_REMINDER_MINUTE, minute)
+            .apply()
+    }
+
+    fun isGoalReminderEnabled(): Boolean {
+        return sharedPrefs.getBoolean(ReminderKeys.GOAL_REMINDER_ENABLED, false)
+    }
+
+    fun setGoalReminderEnabled(enabled: Boolean) {
+        sharedPrefs.edit().putBoolean(ReminderKeys.GOAL_REMINDER_ENABLED, enabled).apply()
+    }
+
+    fun getGoalReminderHour(): Int = sharedPrefs.getInt(ReminderKeys.GOAL_REMINDER_HOUR, 9)
+
+    fun getGoalReminderMinute(): Int = sharedPrefs.getInt(ReminderKeys.GOAL_REMINDER_MINUTE, 0)
+
+    fun setGoalReminderTime(hour: Int, minute: Int) {
+        sharedPrefs.edit()
+            .putInt(ReminderKeys.GOAL_REMINDER_HOUR, hour)
+            .putInt(ReminderKeys.GOAL_REMINDER_MINUTE, minute)
+            .apply()
     }
 
     // ── DataStore — faqat ThemeMode uchun ───────────────────────────────────

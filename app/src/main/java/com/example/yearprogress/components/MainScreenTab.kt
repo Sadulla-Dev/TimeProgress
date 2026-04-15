@@ -151,7 +151,9 @@ fun MainScreenTab(
                         when (tab) {
 
                             MainTab.TIME -> {
-                                TimeScreen()
+                                TimeScreen(
+                                    onOpenProductivity = { selectedTab = MainTab.PRODUCTIVITY }
+                                )
                             }
 
 
